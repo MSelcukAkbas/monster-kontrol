@@ -21,7 +21,7 @@ Ham veri: `prototip/kayit/2026-11-10_gercek_yuk.csv` (1 Hz, `etiket` sütunu = t
 - **Gürültü:** EC ham bayt 18'i izliyor; patlamalı yükte duty %73↔%99 arası salınıyor (09 #4'teki sorun EC'de de var). Eğri tasarımı bunu hesaba katmalı (§3 D).
 - **GPU fanı** kendi eğrisinde (sayfa 4 ofset 32+), bayt 17 ≈ 53–55°C iken %52–55.
 - **İkinci yazar kontrolü:** CC çalışmıyordu. `DCHUService.exe` ve `LaunchFnKey.exe` içinde fan döngüsü yok (yalnız WMI olayları, kısayol, PL1/PL2/voltaj ayarları; `il2.ps1`). → Eğriyi büyük olasılıkla **EC** uyguluyor. Kesin ayrım: test 20 (servis durdurulmuşken custom), 🔐.
-- **CC eğriyi nasıl yazıyor:** `WriteAppSettings` sayfa 4 (ofset 16, 22–25, 32…; obfuscated IL sabitleri) + ardından 0x79 mod 6. Yani kendi eğrimiz = sayfa 4'e yazmak (NVRAM, test 9 kuralları).
+- ~~CC eğriyi `WriteAppSettings` sayfa 4 ile yazıyor~~ → **yanlış ipucu** (aşağıda "CC IL incelemesi"): o sabitler string şifre çözücüsünden (`6000004`) geliyordu.
 
 ### Sabit hız ↔ custom (test 8b, yeni ✅)
 
@@ -61,6 +61,20 @@ Betikler `prototip/testA_egri.py` + `testA_geri.py` (geri yükleme ayrı süreç
 - **GPU fanı:** servis kapalı + custom'da %0 / 0 RPM (bayt 17 = 50–51°C); servis açıkken (8) 53–55°C'de %52–55 idi. Fark sıcaklık eşiği de olabilir, servis de. ❓
 - Profil ve güç planı bu testte değişmedi (Eğlence, Dengeli).
 
+### CC IL incelemesi (iki katlı çağrı taraması, salt okuma)
+
+ControlCenter30.exe'nin donanıma giden tüm yolları yalnız InsydeDCHU.dll üzerinden (WMI yalnız okuma için, servis/boru yok):
+
+| Sarmalayıcı | İmza | Kullanım |
+|---|---|---|
+| `60000CA` | `(cmd, alt, uint değer)` → `SetDCHU_Data(cmd, GetBytes(değer) + [3]=alt)` | `121,25,p` profil; `121,1,m` fan modu; `121,45,x` bir anahtar |
+| `60000C7` | `(cmd, byte[] giriş, ref byte[] çıkış)` → `SetDCHU_DataEx(cmd, giriş, 256, çıkış)` | Hep `cmd 4`, `giriş[0]` = alt komut: 7, 8 (açılışta yetenek sorgusu), 21, 22, 24, 25, 26, 30, 31 |
+| `60000CD` / `60000C5` | `WriteAppSettings(sayfa, ofset, uzunluk, buf)` | Sayfa 4 ofset 9 (fan anahtarı), 28; sayfa 1 ofset 18, 22, 30, 34 … |
+
+- **Fan modunu değiştiren tek yer** bir açma/kapama düğmesi: açık → `121,1,8` (**mod 8**, bilinmiyor) + sayfa 4 ofset 9 = 1; kapalı → mod 0 + ofset 9 = 0.
+- **Eğri noktası yazan kod yok:** ne sayfa 4 ofset 16–27'ye yazan, ne `SetDCHU_DataEx`'e eğri gönderen bir yol bulundu. Bu CC sürümü (7.68.1.0) custom eğri düzenlemiyor gibi; sayfa 4'teki 35/50/99 @ 40/60/80 büyük olasılıkla **fabrika varsayılanı** ve EC'nin eğrisiyle aynı olması da bundan.
+- `SetDCHU_DataEx(4, [alt…])` ailesi keşfedilmemiş bir komut alanı: eğri yükleme orada olabilir ama anlamları bilinmiyor; körlemesine denemek yok.
+
 ## 2. Mimari sonuç (03'teki "test 8'e bağlı" kararı)
 
 **EC fan denetçisi olabilir.** Bu, 03'teki servis/bekçi gerekçesinin çoğunu kaldırıyor: uygulama ölse, Görev Yöneticisi'nden öldürülse, oturum kapansa da fan EC eğrisini izler.
@@ -79,11 +93,13 @@ Betikler `prototip/testA_egri.py` + `testA_geri.py` (geri yükleme ayrı süreç
 
 | # | Soru | Yöntem | Onay |
 |---|---|---|---|
-| A | ⏳ **Eğriyi biz yazabiliyor muyuz?** Sayfa 4'e yazılıyor ama EC hemen almıyor (§1 Kapı A) — CC'nin eğri komutu bulunmalı ya da B ile birlikte | Sayfa 4'ün mevcut baytlarını oku → aynısını `WriteAppSettings` ile yaz (etkisiz yazma) → tek noktayı değiştir → mod 6 → EC yeni eğriyi izliyor mu → eski baytları geri yaz | ⚠️ firmware/NVRAM yazması, kullanıcı onayı |
+| A | ⏳ **Eğriyi biz yazabiliyor muyuz?** Sayfa 4'e yazılıyor ama EC hemen almıyor; CC'de eğri gönderen kod yok. Kalan tek ucuz deneme: sayfa 4'ü değiştir → **yeniden başlat** → EC açılışta okuyor mu (B ile birlikte). Olumsuzsa EC'nin varsayılan eğrisiyle yaşanır | Sayfa 4'ün mevcut baytlarını oku → aynısını `WriteAppSettings` ile yaz (etkisiz yazma) → tek noktayı değiştir → mod 6 → EC yeni eğriyi izliyor mu → eski baytları geri yaz | ⚠️ firmware/NVRAM yazması, kullanıcı onayı |
 | B | **Custom mod kalıcı mı?** | Uyku → uyanma, yeniden başlatma sonrası duty sıcaklığı izliyor mu; sayfa 4 ofset 5 (CC'nin mod kaydı) açılışta uygulanıyor mu | Kullanıcı (yeniden başlatma) |
 | C | ✅ **EC** — servis kapalıyken de eğri izleniyor | Test 20: servis durdurulmuşken custom eğri | 🔐 |
 | D | **Eğri tasarımı** | EC histerezissiz ve ham bayt 18'i izliyor → 70–88°C bandında yatık eğri, taban yüksek; test 21 (dB↔RPM) ile rezonans aralıkları | — |
 | E | **GPU yükünde** | Test 17: GPU fanı neyi izliyor, CPU fanı GPU ısısına tepki veriyor mu (ortak boru) | — |
+
+**Kapı A olumsuz çıkarsa mimari:** katman 0 yine EC custom + **fabrika eğrisi** (35/50/99 @ 40/60/80 — mod 0'ın düz %35'inden çok daha iyi). Eğriyi biçimlendirmek isteyen profiller uygulama çalışırken `0x68` kullanır; uygulama kapanırken/çökünce `0x69` → custom eğriye düşer (8b). Çökmede `0x68` asılı kalır → o profillerde küçük bekçi gerekir.
 
 **Kullanıcı kararı bekleyen:** güvenli çıkış durumu "firmware otomatik (%35)" yerine "custom + güvenli eğri" olsun mu? (CLAUDE.md kuralı değişir.)
 
