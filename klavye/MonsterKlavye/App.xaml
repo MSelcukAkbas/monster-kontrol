@@ -55,6 +55,38 @@
                 <Setter Property="CornerRadius" Value="12" />
                 <Setter Property="Padding" Value="20,18" />
             </Style>
+
+            <!-- Yuvarlak hazır renk düğmesi: seçiliyse dışında halka -->
+            <Style x:Key="RenkDugmesi" TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="Margin" Value="0,0,10,0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Ellipse x:Name="Halka" Stroke="{TemplateBinding Background}" StrokeThickness="2" Opacity="0" Margin="-5" />
+                                <Ellipse Fill="{TemplateBinding Background}" Stroke="#40000000" StrokeThickness="1" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Tag" Value="secili">
+                                    <Setter TargetName="Halka" Property="Opacity" Value="1" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value><ScaleTransform ScaleX="1.08" ScaleY="1.08" /></Setter.Value>
+                                    </Setter>
+                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Halka" Property="Opacity" Value="0.6" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

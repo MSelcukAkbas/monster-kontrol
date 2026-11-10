@@ -1,0 +1,154 @@
+<UserControl x:Class="MonsterKlavye.Sayfalar.EfektlerSayfasi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             Loaded="Sayfa_Loaded" Unloaded="Sayfa_Unloaded">
+    <UserControl.Resources>
+        <!-- Önizlemenin köşesindeki yuvarlak ▶ / ❚❚ düğmesi -->
+        <Style x:Key="OynatDugmesi" TargetType="Button">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse x:Name="Zemin" Fill="#80000000" />
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Zemin" Property="Fill" Value="#40FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Zemin" Property="Stroke" Value="White" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Kart adı: düz metin gibi görünen düğme -->
+        <Style x:Key="AdDugmesi" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Zemin" Background="Transparent" Padding="0,4" BorderThickness="0,0,0,1" BorderBrush="Transparent">
+                            <ContentPresenter HorizontalAlignment="Left" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Zemin" Property="BorderBrush" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Skala seçici: renk geçişli küçük şerit, seçiliyse beyaz kenar -->
+        <Style x:Key="SkalaDugmesi" TargetType="Button">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Margin" Value="3" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Serit" CornerRadius="6" Background="{TemplateBinding Background}"
+                                BorderBrush="#40000000" BorderThickness="1" />
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Tag" Value="secili">
+                                <Setter TargetName="Serit" Property="BorderBrush" Value="White" />
+                                <Setter TargetName="Serit" Property="BorderThickness" Value="2" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Serit" Property="BorderBrush" Value="#C0FFFFFF" />
+                                <Setter TargetName="Serit" Property="BorderThickness" Value="2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="28,22,28,22">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="268" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Galeri -->
+        <DockPanel Grid.Column="0">
+            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+                <TextBlock Text="Efektler" FontSize="28" FontWeight="SemiBold" />
+                <TextBlock Text="Önizlemek için kartın üzerine gel ya da ▶ düğmesine bas" FontSize="13" Foreground="#C8C8CC" Margin="0,2,0,0" />
+            </StackPanel>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="Kartlar" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+
+        <!-- Seçili efekt -->
+        <Border Grid.Column="2" Style="{StaticResource Kart}" Padding="18" AutomationProperties.Name="Seçili efekt">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="SEÇİLİ EFEKT" FontSize="11" Foreground="#B8B8BD" />
+                    <Border Height="92" CornerRadius="10" Background="#141416" Margin="0,12,0,0" ClipToBounds="True">
+                        <Rectangle x:Name="SeciliOnizleme" RadiusX="10" RadiusY="10" />
+                    </Border>
+                    <TextBlock x:Name="SeciliAd" Text="Ateş" FontSize="20" FontWeight="SemiBold" Margin="0,12,0,0" />
+                    <TextBlock x:Name="SeciliAciklama" FontSize="13" Foreground="#C8C8CC" TextWrapping="Wrap" Margin="0,4,0,0" />
+
+                    <DockPanel Margin="0,16,0,0">
+                        <TextBlock Text="Hız" FontSize="13" Foreground="#C8C8CC" />
+                        <TextBlock x:Name="HizYazi" Text="Orta" FontSize="13" HorizontalAlignment="Right" />
+                    </DockPanel>
+                    <Slider x:Name="HizKaydirici" Minimum="1" Maximum="10" Value="5" Margin="0,6,0,0"
+                            SmallChange="1" LargeChange="2" IsSnapToTickEnabled="True" TickFrequency="1" IsMoveToPointEnabled="True"
+                            ValueChanged="Hiz_ValueChanged" AutomationProperties.Name="Efekt hızı" />
+
+                    <StackPanel x:Name="SkalaPaneli" Margin="0,14,0,0">
+                        <TextBlock Text="Renk skalası" FontSize="13" Foreground="#C8C8CC" />
+                        <DockPanel Margin="0,8,0,0">
+                            <Ellipse x:Name="SkalaBas" DockPanel.Dock="Left" Width="24" Height="24" Stroke="#80FFFFFF" StrokeThickness="1"
+                                     AutomationProperties.Name="Başlangıç rengi" />
+                            <Ellipse x:Name="SkalaSon" DockPanel.Dock="Right" Width="24" Height="24" Stroke="#80FFFFFF" StrokeThickness="1"
+                                     AutomationProperties.Name="Bitiş rengi" />
+                            <Border x:Name="SkalaIz" Height="12" CornerRadius="6" Margin="8,0" />
+                        </DockPanel>
+                        <UniformGrid x:Name="SkalaDugmeleri" Columns="4" Margin="-3,8,-3,0" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="RenkPaneli" Margin="0,14,0,0">
+                        <TextBlock Text="Renk (Işık sayfasıyla ortak)" FontSize="13" Foreground="#C8C8CC" />
+                        <ItemsControl x:Name="Renkler" Margin="0,10,0,0" Focusable="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <Border x:Name="Uyari" Background="#4A3416" CornerRadius="8" Padding="10,8" Margin="0,14,0,0">
+                        <TextBlock Text="Hızlı yanıp söner — ışığa duyarlıysan kullanma." FontSize="12" Foreground="#FFCF8A" TextWrapping="Wrap" />
+                    </Border>
+                </StackPanel>
+
+                <ui:Button x:Name="UygulaDugmesi" DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+                           Height="38" Appearance="Primary" Content="Klavyeye uygula" Click="Uygula_Click" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

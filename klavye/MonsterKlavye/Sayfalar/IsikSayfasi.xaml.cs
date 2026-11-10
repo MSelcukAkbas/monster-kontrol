@@ -9,7 +9,7 @@ namespace MonsterKlavye.Sayfalar;
 
 public partial class IsikSayfasi : UserControl
 {
-    static readonly (string Ad, Rgb Renk)[] HazirRenkler =
+    internal static readonly (string Ad, Rgb Renk)[] HazirRenkler =
     [
         ("Ateş turuncusu", new(0xFF, 0x6A, 0x00)), ("Kırmızı", new(0xFF, 0x20, 0x20)),
         ("Pembe", new(0xFF, 0x2D, 0x8A)), ("Mor", new(0x9B, 0x4D, 0xFF)),
@@ -30,10 +30,10 @@ public partial class IsikSayfasi : UserControl
 
     readonly SolidColorBrush _tusZemin = new(), _tusKenar = new(), _tusYazi = new();
 
-    Rgb _renk = HazirRenkler[0].Renk;
-    string _renkAdi = HazirRenkler[0].Ad;
-    int _parlaklik = 80;
-    bool _acik = true;
+    Rgb _renk;
+    string _renkAdi = "";
+    int _parlaklik;
+    bool _acik;
     bool _surukleniyor;
 
     public IsikSayfasi()
@@ -41,8 +41,20 @@ public partial class IsikSayfasi : UserControl
         InitializeComponent();
         TuslariOlustur();
         HazirlariOlustur();
-        Yenile(gonder: true); // açılışta istenen durumu klavyeye uygula (BIOS kendi kaydını uygulamış olabilir)
+        App.Motor.Degisti += MotordanAl; // Efektler sayfası da rengi / açıklığı değiştirebilir
+        MotordanAl();
     }
+
+    /// <summary>Durumun sahibi motor (açılışta klavyeye o yazar); sayfa yalnız gösterir.</summary>
+    void MotordanAl()
+    {
+        var t = App.Motor.Temel;
+        if (t.Renk != _renk || _renkAdi == "") _renkAdi = AdiBul(t.Renk);
+        (_renk, _parlaklik, _acik) = (t.Renk, t.ParlaklikYuzde, t.Acik);
+        Yenile(gonder: false);
+    }
+
+    static string AdiBul(Rgb renk) => HazirRenkler.FirstOrDefault(h => h.Renk == renk).Ad ?? "Özel renk";
 
     // ---------- durum → ekran + klavye ----------
 
@@ -52,7 +64,7 @@ public partial class IsikSayfasi : UserControl
         var renk = Color.FromRgb(_renk.R, _renk.G, _renk.B);
 
         RenkAdi.Text = _acik ? _renkAdi : "Kapalı";
-        DurumYazi.Text = _acik ? $"Açık · %{_parlaklik} parlaklık · Sabit renk" : "Kapalı";
+        DurumYazi.Text = _acik ? $"Açık · %{_parlaklik} parlaklık · {App.Motor.Efekt.Ad}" : "Kapalı";
         GucDugmesi.IsChecked = _acik;
         ParlaklikYazi.Text = $"%{_parlaklik}";
         if (ParlaklikKaydirici.Value != _parlaklik) ParlaklikKaydirici.Value = _parlaklik;
@@ -70,7 +82,7 @@ public partial class IsikSayfasi : UserControl
         // Uygulamanın vurgu rengi = klavye rengi
         ApplicationAccentColorManager.Apply(renk, ApplicationTheme.Dark);
 
-        if (gonder) App.Kontrol?.Ayarla(new KlavyeDurumu(_renk, _parlaklik, _acik));
+        if (gonder) App.Motor.TemelAyarla(new KlavyeDurumu(_renk, _parlaklik, _acik));
     }
 
     static Color Karistir(Color a, Color b, double t) => Color.FromRgb(
@@ -80,7 +92,10 @@ public partial class IsikSayfasi : UserControl
     {
         (_renk, _renkAdi) = (renk, ad);
         if (!_acik) _acik = true; // renk seçmek ışığı açar
-        Yenile();
+        Yenile(); // önce yeni renk motora gitsin: EfektAyarla'nın Degisti'si alanları motordan geri okur
+        // Skalalı efekt seçilen rengi kullanmaz: kullanıcı rengi görsün diye sabit renge geç.
+        // Nefes, kalp, flaş bu rengi kullanır, sürer.
+        if (App.Motor.Efekt.SkalaVar) App.Motor.EfektAyarla(Efektler.Sabit);
     }
 
     // ---------- klavye çizimi ----------
@@ -118,7 +133,7 @@ public partial class IsikSayfasi : UserControl
         {
             var dugme = new Button
             {
-                Style = (Style)Resources["RenkDugmesi"],
+                Style = (Style)FindResource("RenkDugmesi"),
                 Background = new SolidColorBrush(Color.FromRgb(renk.R, renk.G, renk.B)),
                 ToolTip = ad,
                 DataContext = renk,

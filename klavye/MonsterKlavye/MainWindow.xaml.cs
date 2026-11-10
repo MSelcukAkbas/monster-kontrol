@@ -8,6 +8,7 @@ namespace MonsterKlavye;
 public partial class MainWindow : FluentWindow
 {
     readonly IsikSayfasi _isik = new();
+    readonly EfektlerSayfasi _efektler = new(); // tek örnek: seçim ve ayarlar menü değişince kaybolmasın
 
     public MainWindow()
     {
@@ -31,7 +32,7 @@ public partial class MainWindow : FluentWindow
         Icerik.Content = secili.Tag switch
         {
             "isik" => _isik,
-            "efektler" => YakindaSayfasi("Efektler", "Efekt galerisi bir sonraki adımda (K3) gelecek."),
+            "efektler" => _efektler,
             _ => YakindaSayfasi("Ayarlar", "Ayarlar K4'te gelecek: Windows ile başlat, tepsi, uyku zamanlayıcısı."),
         };
     }

@@ -72,7 +72,7 @@
 | K0 ✅ | Çözüm iskeleti, `MonsterKontrol.Dchu`, birim testleri | `dotnet test` 14/14 (3'ü donanımda salt okuma) |
 | K1 ✅ | Konsol duman testi: kırmızı → yeşil → mavi → kapalı → turuncu | kullanıcı gözle doğruladı |
 | K2 ✅ | WPF + WPF UI 4.3.0 pencere: güç, ton şeridi, hazır renkler, HEX, parlaklık + kademeler; vurgu = klavye rengi; birleştiren gönderim (`KlavyeKontrol`) | 33/33 test, ekran görüntüsüyle kontrol |
-| K3 | Efekt motoru + galeri | 15 kare/sn, CPU ölçümü |
+| K3 ✅ | Efekt motoru + galeri (11 efekt, skala, hız); efekt parlaklığı renge katılır → karede 1 DLL yazması | 72/72 test; CPU %0,72 küçültülmüş, %1,22 galeri açık; kullanıcı klavyede gözle doğruladı |
 | K4 | Tepsi, Windows ile başlat, tek örnek, ayar kaydı | yeniden başlatma testi |
 | K5 | Uyku/uyanma/kilit yeniden uygulama | uyku testi |
 | K6 | Tek dosya yayın (`dotnet publish -r win-x64 --self-contained -p:PublishSingleFile=true`) | temiz çalıştırma |

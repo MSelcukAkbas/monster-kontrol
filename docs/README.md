@@ -2,16 +2,17 @@
 
 Monster ABRA A5 V16.6 (Clevo) için Control Center'ın yerine geçecek kendi fan / klavye ışığı / güç uygulamamız.
 
-## ⭐ KALDIĞIMIZ YER (2026-11-10 16:30) — yeni oturum buradan başlasın
+## ⭐ KALDIĞIMIZ YER (2026-11-10 19:45) — yeni oturum buradan başlasın
 
-- **Proje:** `C:\Users\akbas\Desktop\MonsterKontrol` (tek git deposu). Çalışma dalı **`klavye/k0-iskelet`** — `main` henüz boş, **hiçbir şey commit edilmedi**.
-- **Monster Klavye K0–K2 bitti** ve kullanıcı onayladı: pencere, güç, ton şeridi, hazır renkler, HEX, parlaklık, vurgu = klavye rengi. Kullanıcı: "düğmeler güzel çalışıyor, geçişler yumuşak, tasarım güzel".
-- **Sıradaki: K3** — efekt motoru + efekt galerisi ([11](11-uygulama-plani.md) §2.3; prototip: `prototip/klavye.py` `EFEKTLER`; tasarım: [Monster Klavye Tasarımı](https://claude.ai/artifact/Sss5Tpdnyq64v7myTESRbK) Efektler ekranı — önizleme yalnız fareyle üzerine gelince / ▶ düğmesiyle, renk skalası). Sonra K4 (tepsi, Windows ile başlat, ayar kaydı), K5, K6.
-- **Derleme:** .NET 10.0.403 SDK kullanıcı profilinde, PATH'te DEĞİL. Her komuttan önce:
+- **Proje:** `C:\Users\akbas\Desktop\MonsterKontrol` (tek git deposu). Çalışma dalı **`klavye/k0-iskelet`** (K0–K2 ve K3 commit edildi; `main` henüz boş).
+- **Monster Klavye K0–K3 bitti** ve kullanıcı onayladı. K3: efekt motoru (`Klavye/EfektMotoru.cs`, 15 kare/sn, klavye durumunun tek sahibi) + 11 efekt (`Klavye/Efektler.cs`, saf fonksiyonlar, 8 renk skalası) + galeri (`Sayfalar/EfektlerSayfasi`). Kullanıcı: "gayet düzgün çalışıyorlar".
+- **K3 kararları:** efekt parlaklığı renge katılır (RGB × parlaklık), donanım parlaklığı kullanıcınınkinde kalır → karede en çok 1 DLL yazması. CPU: efekt + küçültülmüş %0,72, galeri açıkken %1,22; ayrı parlaklık komutuyla %1,41'di (maliyet DLL yazma sayısında). Bellek 148–162 MB çalışma kümesi / 75 MB özel (Debug). Skalalı efekt çalışırken Işık'tan renk seçmek sabit renge geçirir; nefes/kalp/flaş Işık rengini kullanır.
+- **Sıradaki: K4** — tepsi, Windows ile başlat, tek örnek, ayar kaydı ([11](11-uygulama-plani.md) §2.5; tasarım: Ayarlar ve Tepsi ekranları). Açılış durumu şimdilik `App.xaml.cs`'de sabit (`shortcut:` yorumu), K4'te ayar kaydından okunacak. Sonra K5 (uyku/kilit: efekti duraklat + yeniden uygula), K6.
+- **Derleme:** .NET 10.0.403 SDK kullanıcı profilinde, PATH'te DEĞİL. `DOTNET_ROOT` kalıcı kullanıcı değişkeni yapıldı (exe çift tıkla açılır). Kabuktan derlerken yine:
   `$env:DOTNET_ROOT="$env:LOCALAPPDATA\Microsoft\dotnet"; $env:PATH="$env:DOTNET_ROOT;$env:PATH"`
-  Sonra `dotnet build MonsterKontrol.slnx`, `dotnet test MonsterKontrol.slnx` (47/47 geçiyor). Uygulama: `klavye\MonsterKlavye\bin\Debug\net10.0-windows\MonsterKlavye.exe` (açıkken derleme exe kilidi yüzünden başarısız olur → önce kapat).
-- **Kod haritası:** `ortak/MonsterKontrol.Dchu` (DLL bulma, 512 B tampon, tek iş parçacığı kuyruğu, `Komutlar`), `klavye/MonsterKlavye` (`Klavye/Renk.cs`, `Klavye/KlavyeKontrol.cs` birleştiren gönderim, `Sayfalar/IsikSayfasi`, `MainWindow` kendi yan menüsü), testler `*.Tests`, `klavye/MonsterKlavye.Duman` (K1 konsol testi, silinebilir).
-- **Notlar:** WPF UI 4.3.0; vurgu fırçası olarak `AccentFillColorDefaultBrush` kullan (`SystemAccentColorPrimaryBrush` Windows mavisini gösteriyor). Ekran görüntüsü için `PrintWindow` (öne getirme çalışmıyor). PawnIO hâlâ kurulu (kullanıcı kararı bekliyor). Performans uygulaması henüz başlamadı (test 8 öncelikli, [05](05-yarin-test-listesi.md)).
+  Sonra `dotnet build MonsterKontrol.slnx`, `dotnet test MonsterKontrol.slnx` (72/72 geçiyor). Uygulama: `klavye\MonsterKlavye\bin\x64\Debug\net10.0-windows\MonsterKlavye.exe` (çözüm x64 derler; `bin\Debug\…` eski kopya, kullanma). Açıkken derleme exe kilidi yüzünden başarısız olur → önce kapat.
+- **Kod haritası:** `ortak/MonsterKontrol.Dchu` (DLL bulma, 512 B tampon, tek iş parçacığı kuyruğu, `Komutlar`), `klavye/MonsterKlavye` (`Klavye/Renk.cs`, `Klavye/KlavyeKontrol.cs` birleştiren gönderim, `Klavye/EfektMotoru.cs`, `Klavye/Efektler.cs`, `Sayfalar/IsikSayfasi`, `Sayfalar/EfektlerSayfasi`, `MainWindow` kendi yan menüsü), testler `*.Tests`, `klavye/MonsterKlavye.Duman` (K1 konsol testi, silinebilir).
+- **Notlar:** WPF UI 4.3.0; vurgu fırçası olarak `AccentFillColorDefaultBrush` kullan (`SystemAccentColorPrimaryBrush` Windows mavisini gösteriyor). Ekran görüntüsü için `PrintWindow`; arayüzü UI Automation ile sürmek için düğmelerde `AutomationProperties.Name` var ("Seç: Ateş", "Klavyeye uygula"). Yapılmayanlar: gökkuşağında dönen vurgu (doc 04); Polis skala şeridi tüm yayı gösteriyor (efekt yalnız iki ucu kullanır). PawnIO hâlâ kurulu (kullanıcı kararı bekliyor). Performans uygulaması henüz başlamadı (test 8 öncelikli, [05](05-yarin-test-listesi.md)).
 
 ## Belgeler
 

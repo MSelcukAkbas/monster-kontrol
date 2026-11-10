@@ -32,6 +32,13 @@ public readonly record struct Rgb(byte R, byte G, byte B)
         return new Rgb((byte)Math.Round(r * 255), (byte)Math.Round(g * 255), (byte)Math.Round(b * 255));
     }
 
+    /// <summary>Her kanalı k (0–1) ile çarpar: efektin parlaklığı.</summary>
+    public Rgb Olcekle(double k)
+    {
+        k = Math.Clamp(k, 0, 1);
+        return new((byte)Math.Round(R * k), (byte)Math.Round(G * k), (byte)Math.Round(B * k));
+    }
+
     /// <summary>Rengin tonu (0–360°); gri tonlarda 0.</summary>
     public double Ton
     {
