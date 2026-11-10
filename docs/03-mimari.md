@@ -25,7 +25,9 @@
 | GPU sıcaklığı | **NVML** (`nvml.dll`, NVIDIA sürücüsüyle gelir) | DCHU bayt 17 GPU çekirdeği değil |
 | CPU frekans sınırı | `powrprof.dll` (`PowerWriteACValueIndex`, `PowerSetActiveScheme`) ile kendi güç planımız | `powercfg`'ye süreç açmadan, yönetici gerekmeden |
 
-❓ **Karar test 8'den sonra:** EC custom eğriyi kendisi uyguluyorsa uygulama "eğri noktalarını yazan arayüz"e iner ve bekçi süreç yeter; uygulamıyorsa küçük fan bekçisi servisi. Her iki durumda Aşama 1 tek exe ile başlar; düşük sabit fan profilleri **bekçi gelmeden varsayılan olmaz**.
+✅ **Test 8 (2026-11-10): custom eğriyi EC/firmware uyguluyor** (kullanıcı modunda yazar bulunamadı; CCDCHUService ancak test 20 ile kesin dışlanır) → servis/bekçi büyük olasılıkla gereksiz; yeni katmanlı mimari ve açık kapılar: [12](12-performans-arka-plan.md).
+
+~~Karar test 8'den sonra:~~ EC custom eğriyi kendisi uyguluyorsa uygulama "eğri noktalarını yazan arayüz"e iner ve bekçi süreç yeter; uygulamıyorsa küçük fan bekçisi servisi. Her iki durumda Aşama 1 tek exe ile başlar; düşük sabit fan profilleri **bekçi gelmeden varsayılan olmaz**.
 
 ## Neden servis? — "kaçış yolları" şartı
 

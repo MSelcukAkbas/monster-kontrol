@@ -13,7 +13,7 @@ Komutlar `prototip/` klasöründen çalıştırılır.
 | 5 | **Açılışta / uykudan dönüşte ne oluyor** | Klavyeyi yeşil + fanı sabit %30 yap → uyku → uyan; sonra yeniden başlat | EC/servis bizim ayarı koruyor mu, CC kaydını mı uyguluyor? → yeniden uygulama mantığı |
 | 6 | **Duran fanı düşük hızla başlatma** | GPU fanı %0 → bekle → %10 / %15 / %20; RPM 5 sn'de > 0 mı | Kick-start eşiği |
 | 7 | ✅ **Donanım efektleri — YAPILDI** | 7 efekt 8'er sn | Hiçbiri çalışmadı; CC de bu modelde efekt sunmuyor → yazılım efektleri |
-| 8 | **Fan modu 5 / 6** | `fan.py mod maxq`, `mod custom` + tampon 12 | Custom'da CC eğrisi firmware'de mi uygulanıyor? |
+| 8 | **Fan modu 5 / 6** | `fan.py mod maxq`, `mod custom` + tampon 12 | Custom'da CC eğrisi firmware'de mi uygulanıyor? ✅ **2026-11-10: eğriyi EC/firmware uyguluyor (kullanıcı modunda yazar yok; CCDCHUService kesin dışlanması test 20); maxQ = otomatik = düz %35** ([12](12-performans-arka-plan.md)) |
 | 9 | **WriteAppSettings** (opsiyonel, dikkatli) | Yalnız sayfa 2 ofset 35 (parlaklık) tek bayt yaz → CC'de görünüyor mu → eski değeri geri yaz | Firmware'e kalıcı yazabiliyor muyuz (açılış rengi için) |
 | 10 | **Uzun süreli sessiz profil** | 2,9 GHz + fan %15, 10 dk tam yük | Dengedeki gerçek sıcaklık (35 sn'lik testten 1–3°C fazla olabilir) |
 | 11 | **Webcam / touchpad anahtarı** (ekstra) | 0x06/0x09 oku; 0x22/0x2A yaz → durum değişiyor mu | Ekstra özellik olarak eklenebilir mi |
@@ -23,14 +23,14 @@ Komutlar `prototip/` klasöründen çalıştırılır.
 | 16 | **Uzun denge ölçümleri** (09) | Profil noktaları için 10–15 dk/nokta, karışık sıra, 2 tekrar, oda sıcaklığı not | Gerçek denge sıcaklıkları; eğri kötü koşula göre |
 | 17 | **GPU / oyun yükü** (09) | Bir oyun ya da GPU stres + CPU; NVML GPU °C/W, bayt 18, fanlar | Ortak boruda GPU'nun etkisi; "oyunda CPU tavanı" kuralı buna göre |
 | 18 | ✅ **4 güç profilinin gerçek farkı — YAPILDI** | MSR 0x610 (PawnIO, salt okuma) | PL1/PL2: sessiz 15/30, tasarruf 30/30, eğlence 45/107, performans 60/135 W — hepsi farklı (10) |
-| 23 | **PDH kısma bayrakları yük altında** (10) | "Performans Sınırı Bayrakları/Yüzdesi" 90°C'de | 0x64F (hep 0) yerine sürücüsüz kısma bilgisi |
+| 23 | **PDH kısma bayrakları yük altında** (10) | "Performans Sınırı Bayrakları/Yüzdesi" 90°C'de | 0x64F (hep 0) yerine sürücüsüz kısma bilgisi ⏳ 86°C'ye kadar 0 / %100 — 90°C'de tekrar ([12](12-performans-arka-plan.md)) |
 | 24 | **ETW PMC çözümü** (10) | TraceEvent ile `pmc.etl` → IPC/LLC; LHM kapalıyken `PmcCtrConrruption` | IPC gerçekten okunabiliyor mu |
 | 25 | **PresentMon FPS** (10) | Oyunda yönetici olmadan/ile | Oyun için gerçek performans vekili |
 | 19 | **Firmware otomatiği temiz koşulda** (09) | Soğuk açılış, **hiçbir DCHU yazması yapmadan**, 5–10 dk tam yük, 4 profil | "%35'te kalıyor" bizim yazmalarımızın yan etkisi mi? |
 | 20 | **CCDCHUService durdurulunca** (09) | 🔐 servis durdur → `oku.py`, Fn tuşları, Fn+ışık sonrası renk → servisi başlat | İkinci yazar riski |
 | 21 | **Fan gürültüsü** (09) | Telefonla dB ölçer; %10…%100 adımları, rezonans yapan RPM aralıkları | Eğri o aralıkları atlar |
 | 22 | **Undervolt kilidi** (09, opsiyonel) | ThrottleStop ile yalnız okuma (kullanıcı onayıyla, uygulama dışı) | Kilitli değilse güç azaltmanın en etkili yolu |
-| 26 | **İki süreçten eşzamanlı DLL** (03) | Süreç A tampon 12'yi 1 Hz okur, süreç B 15 kare/sn renk yazar, 10 dk | Çökme / bozuk okuma yoksa iki uygulama bağımsız; varsa `Global\MonsterKontrolDchu` mutex'i |
+| 26 | **İki süreçten eşzamanlı DLL** (03) | Süreç A tampon 12'yi 1 Hz okur, süreç B 15 kare/sn renk yazar, 10 dk | Çökme / bozuk okuma yoksa iki uygulama bağımsız; varsa `Global\MonsterKontrolDchu` mutex'i ✅ kısmi: 10 dk, sorun yok ([12](12-performans-arka-plan.md)) |
 | 27 | **CC uyku zamanlayıcısı firmware'de mi** (11) | CC kapalı, zamanlayıcı kaydı 6 dk açık; 7 dk dokunma; efekt çalışırken de dene | Klavye uygulamasının kendi zamanlayıcısı gerekli mi / çakışır mı |
 | 12 | **Monster kaldırma provası** | Bkz. 06; kaldır → yeniden başlat → 1, 4, 5'i tekrar | Bağımlılık kalmadığını doğrula |
 

@@ -12,4 +12,9 @@
     <Project Path="ortak/MonsterKontrol.Dchu.Tests/MonsterKontrol.Dchu.Tests.csproj" />
     <Project Path="ortak/MonsterKontrol.Dchu/MonsterKontrol.Dchu.csproj" />
   </Folder>
+  <Folder Name="/performans/">
+    <Project Path="performans/MonsterPerformans.Cekirdek.Tests/MonsterPerformans.Cekirdek.Tests.csproj" />
+    <Project Path="performans/MonsterPerformans.Cekirdek/MonsterPerformans.Cekirdek.csproj" />
+    <Project Path="performans/MonsterPerformans.Golge/MonsterPerformans.Golge.csproj" />
+  </Folder>
 </Solution>
