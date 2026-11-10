@@ -73,7 +73,24 @@ ControlCenter30.exe'nin donanıma giden tüm yolları yalnız InsydeDCHU.dll üz
 
 - **Fan modunu değiştiren tek yer** bir açma/kapama düğmesi: açık → `121,1,8` (**mod 8**, bilinmiyor) + sayfa 4 ofset 9 = 1; kapalı → mod 0 + ofset 9 = 0.
 - **Eğri noktası yazan kod yok:** ne sayfa 4 ofset 16–27'ye yazan, ne `SetDCHU_DataEx`'e eğri gönderen bir yol bulundu. Bu CC sürümü (7.68.1.0) custom eğri düzenlemiyor gibi; sayfa 4'teki 35/50/99 @ 40/60/80 büyük olasılıkla **fabrika varsayılanı** ve EC'nin eğrisiyle aynı olması da bundan.
+- **Mod 8 denendi (21:54, `prototip/test_mod8.py`, kayıt `kayit/test_mod8.log`; kullanıcı: CC'deki düğme "Turbo fan"):** ret 121; 60 sn boyunca CPU fanı **değişmedi** (%35 düz, 57–81°C), GPU fanı çoğunlukla %0 (b17 49–51°C, ara sıra tekme). Turbo etkisi yok. Mod 0 + `0x69` sonrası %35/%35'e döndü. GPU fanının %0'a düşmesi otomatikte de b17 ≈ 50°C'de ara sıra görülüyor → muhtemelen sıcaklık eşiği (kapı A'daki GPU %0 gözlemi de büyük olasılıkla bu). Turbo için CC'nin ayrıca yazdığı sayfa 4 ofset 9 = 1 (NVRAM) gerekiyor olabilir — denenmedi.
 - `SetDCHU_DataEx(4, [alt…])` ailesi keşfedilmemiş bir komut alanı: eğri yükleme orada olabilir ama anlamları bilinmiyor; körlemesine denemek yok.
+
+### CC'nin custom eğrisi: sayfa 4 düzeni çözüldü (22:00)
+
+Kullanıcı CC'de custom eğriyi değiştirdi (CPU 53°C → %98, GPU 61°C → %79). Ardından EC **yeni eğriyi izliyor**: CPU 64–68°C'de %98–99 (eski eğriyle ~%55–62 olurdu). Kayıt `prototip/kayit/custom_cc.log`, sayfa yedeği `prototip/kayit/sayfa4_cc_ozel_2026-11-10.json`.
+
+| Ofset | CPU | GPU | Anlam |
+|---|---|---|---|
+| duty % (4 nokta, sonuncusu 100) | 16–19 | 34–37 | |
+| sıcaklık °C (4 nokta, sonuncusu 100) | 22–25 | 40–43 | |
+| **eğim** (3 parça, 16 bit LE) | 28, 30, 32 | 46, 48, 50 | `round((d₂−d₁) × 2,55 × 16 / (t₂−t₁))` = duty(0–255)/°C × 16 |
+| fan modu | 5 | | CC custom'da 6, turbo'da 1 |
+
+- Eğim formülü eski (fabrika) ve yeni eğrinin 12 değerinin **hepsini** tutturuyor. EC ara değeri büyük olasılıkla bu eğimlerle hesaplıyor.
+- **Kapı A bu yüzden geçersizdi:** yalnız bayt 18'i (nokta) değiştirdik, eğimleri (30, 32) güncellemedik; EC 60–80°C'yi eski eğimle hesapladı. Ayrıca yük patlamalıydı.
+- 20–21 / 26–27 (50,99 / 60,80) değişmedi — anlamı bilinmiyor. CC ayrıca 53–60, 64, 68, 81–82'yi değiştirdi (başka ayarlar olabilir).
+- **Kapı A' (2026-11-10) ❌ — EC sayfa 4'ü çalışırken okumuyor.** CC kapalı, servis açık, hafif yük. Tutarlı test eğrisi (35/45/60/100 @ 40/60/80/100, eğimler 20/31/82) sayfa 4'e yazıldı (geri okumada doğru), sonra mod 6. CPU 67–75°C'de fan 60 sn boyunca **%98–99** kaldı: test eğrisi ~%52 verirdi, kullanıcının CC eğrisi %98. EC, CC'nin en son ittiği eğriyi tutuyor; sayfa 4 yalnız CC'nin kaydı. Eğriyi EC'ye CC başka bir çağrıyla gönderiyor (aday: `SetDCHU_DataEx(4, …)` alt komutları). Sayfa yedekten geri yazıldı, taze okumayla birebir doğrulandı; fan mod 0 + `0x69` → %35. Kayıt `prototip/kayit/testA2.log`.
 
 ## 2. Mimari sonuç (03'teki "test 8'e bağlı" kararı)
 
@@ -93,7 +110,7 @@ ControlCenter30.exe'nin donanıma giden tüm yolları yalnız InsydeDCHU.dll üz
 
 | # | Soru | Yöntem | Onay |
 |---|---|---|---|
-| A | ⏳ **Eğriyi biz yazabiliyor muyuz?** Sayfa 4'e yazılıyor ama EC hemen almıyor; CC'de eğri gönderen kod yok. Kalan tek ucuz deneme: sayfa 4'ü değiştir → **yeniden başlat** → EC açılışta okuyor mu (B ile birlikte). Olumsuzsa EC'nin varsayılan eğrisiyle yaşanır | Sayfa 4'ün mevcut baytlarını oku → aynısını `WriteAppSettings` ile yaz (etkisiz yazma) → tek noktayı değiştir → mod 6 → EC yeni eğriyi izliyor mu → eski baytları geri yaz | ⚠️ firmware/NVRAM yazması, kullanıcı onayı |
+| A | ⏳ **Eğriyi biz yazabiliyor muyuz?** A' ❌: sayfa 4 yazılıyor ama EC çalışırken okumuyor; CC eğriyi başka çağrıyla itiyor. Kalan yollar: (1) CC'de eğri kaydederken hangi DCHU çağrısının gittiğini yakalamak (API izleme), (2) sayfa 4'ü değiştir → **yeniden başlat** → EC açılışta okuyor mu (B ile birlikte). Olumsuzsa CC'nin bıraktığı eğriyle yaşanır | Sayfa 4 yaz → mod 6 → EC izliyor mu → yedekten geri yaz (A' bunu yaptı) | ⚠️ firmware/NVRAM yazması, kullanıcı onayı |
 | B | **Custom mod kalıcı mı?** | Uyku → uyanma, yeniden başlatma sonrası duty sıcaklığı izliyor mu; sayfa 4 ofset 5 (CC'nin mod kaydı) açılışta uygulanıyor mu | Kullanıcı (yeniden başlatma) |
 | C | ✅ **EC** — servis kapalıyken de eğri izleniyor | Test 20: servis durdurulmuşken custom eğri | 🔐 |
 | D | **Eğri tasarımı** | EC histerezissiz ve ham bayt 18'i izliyor → 70–88°C bandında yatık eğri, taban yüksek; test 21 (dB↔RPM) ile rezonans aralıkları | — |

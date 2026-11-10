@@ -1,0 +1,37 @@
+22:11:49 == otomatik (taban)
+   22:11:52 {'cpu_rpm': 2691, 'cpu_%': 35, 'cpu_C': 83, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:11:55 {'cpu_rpm': 2681, 'cpu_%': 35, 'cpu_C': 86, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:11:58 {'cpu_rpm': 2691, 'cpu_%': 35, 'cpu_C': 88, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:01 {'cpu_rpm': 2691, 'cpu_%': 35, 'cpu_C': 76, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:04 {'cpu_rpm': 2691, 'cpu_%': 35, 'cpu_C': 83, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+yazma ret: 1
+fark: [(17, 98, 45), (18, 99, 60), (23, 53, 60), (28, 198, 20), (30, 2, 31), (32, 2, 82)]
+22:12:04 == custom, test eğrisi: 80°C üstü %60 + 2/°C (90°C → %80)
+   22:12:07 {'cpu_rpm': 3673, 'cpu_%': 65, 'cpu_C': 82, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:10 {'cpu_rpm': 5014, 'cpu_%': 96, 'cpu_C': 89, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:13 {'cpu_rpm': 5659, 'cpu_%': 99, 'cpu_C': 78, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:16 {'cpu_rpm': 5417, 'cpu_%': 99, 'cpu_C': 81, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:19 {'cpu_rpm': 5586, 'cpu_%': 99, 'cpu_C': 74, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 57}
+   22:12:22 {'cpu_rpm': 5600, 'cpu_%': 99, 'cpu_C': 75, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:25 {'cpu_rpm': 5600, 'cpu_%': 99, 'cpu_C': 74, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:28 {'cpu_rpm': 5600, 'cpu_%': 99, 'cpu_C': 73, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:31 {'cpu_rpm': 5600, 'cpu_%': 99, 'cpu_C': 72, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:34 {'cpu_rpm': 5615, 'cpu_%': 99, 'cpu_C': 71, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:37 {'cpu_rpm': 5615, 'cpu_%': 99, 'cpu_C': 70, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:40 {'cpu_rpm': 5615, 'cpu_%': 99, 'cpu_C': 87, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 56}
+   22:12:43 {'cpu_rpm': 5600, 'cpu_%': 99, 'cpu_C': 74, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 55}
+   22:12:46 {'cpu_rpm': 5586, 'cpu_%': 99, 'cpu_C': 72, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 55}
+   22:12:49 {'cpu_rpm': 5600, 'cpu_%': 99, 'cpu_C': 71, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 55}
+   22:12:52 {'cpu_rpm': 5615, 'cpu_%': 99, 'cpu_C': 70, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 55}
+   22:12:55 {'cpu_rpm': 5615, 'cpu_%': 99, 'cpu_C': 70, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 55}
+   22:12:58 {'cpu_rpm': 5390, 'cpu_%': 98, 'cpu_C': 67, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 55}
+   22:13:01 {'cpu_rpm': 5615, 'cpu_%': 99, 'cpu_C': 69, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 55}
+   22:13:04 {'cpu_rpm': 5586, 'cpu_%': 99, 'cpu_C': 72, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 54}
+test çıkış 0
+geri öncesi fark: [(17, 98, 45), (18, 99, 60), (23, 53, 60), (28, 198, 20), (30, 2, 31), (32, 2, 82)]
+geri yazma ret: 1
+22:13:05 güvenli durum: {'cpu_rpm': 5586, 'cpu_%': 99, 'cpu_C': 72, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 54}
+TAZE OKUMA: yedekle ayni
+BITTI
+
+[exited with code 0]

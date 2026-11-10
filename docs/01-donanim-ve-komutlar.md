@@ -55,7 +55,7 @@ BIOS / EC
 | 103 | 0x67 | `0x1002A000` nefes, `0x33010000` döngü, `0x70000000` rastgele, `0x80000000` dans, `0x90000000` tempo, `0xA0000000` flaş, `0xB0000000` dalga | Donanım efektleri | ❌ **7'si de denendi, hiçbiri çalışmadı.** CC de bu model için efekt sunmuyor → donanımda yok. Efektler yazılımla yapılacak |
 | 104 | 0x68 | `fan1 \| fan2<<8` (0–255 her biri) | **Sabit fan hızı**, iki fan bağımsız | ✅ %0–100 arası; %0'da fan durur |
 | 105 | 0x69 | `0x0F` (fan başına bir bit) | **Fanları otomatiğe döndür** | ✅ hem sabit hızdan hem Max modundan dönüyor. `0` göndermek etkisiz! **Etkin moda döner:** custom'dayken `0x68` sonrası `0x69` → custom eğri (12) |
-| 121 | 0x79 | `(0x01<<24) \| mod` → mod: 0 otomatik, 1 max, 5 maxQ, 6 custom | Fan modu | ✅ hepsi (12): otomatik ve maxQ düz %35, custom = EC sayfa 4 eğrisini izler (~+%10/sn, −%5/sn) |
+| 121 | 0x79 | `(0x01<<24) \| mod` → mod: 0 otomatik, 1 max, 5 maxQ, 6 custom | Fan modu | ✅ hepsi (12): otomatik ve maxQ düz %35, custom = EC sayfa 4 eğrisini izler (~+%10/sn, −%5/sn); **8** = CC "Turbo fan" düğmesi, tek başına etkisiz görünüyor (12) |
 | 121 | 0x79 | `(0x19<<24) \| p` → p: 0 sessiz, 1 tasarruf, 2 performans, 3 eğlence | **Güç profili** (güç sınırı) | ✅ MSR 0x610 ile doğrulandı: **PL1/PL2 = sessiz 15/30 W, tasarruf 30/30, eğlence 45/107, performans 60/135** (bkz. 10) |
 | 121 | 0x79 | `0x18000000`, `0x1E000000`, `0x22000001` | LedKeyboardSetting kullanıyor, anlamı bilinmiyor | ❓ |
 

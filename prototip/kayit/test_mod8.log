@@ -1,0 +1,39 @@
+21:54:31 == otomatik (taban)
+   21:54:34 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 66, 'gpu_rpm': 2267, 'gpu_%': 35, 'gpu_C': 52}
+   21:54:37 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 63, 'gpu_rpm': 2281, 'gpu_%': 35, 'gpu_C': 52}
+   21:54:40 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 81, 'gpu_rpm': 2296, 'gpu_%': 35, 'gpu_C': 51}
+   21:54:43 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 60, 'gpu_rpm': 2272, 'gpu_%': 35, 'gpu_C': 51}
+   21:54:46 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 60, 'gpu_rpm': 2264, 'gpu_%': 35, 'gpu_C': 51}
+mod 8 ret: 121
+21:54:46 == mod 8
+   21:54:50 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 60, 'gpu_rpm': 721, 'gpu_%': 0, 'gpu_C': 51}
+   21:54:53 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:54:56 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 58, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:54:59 {'cpu_rpm': 2665, 'cpu_%': 35, 'cpu_C': 58, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:55:02 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 58, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:55:05 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:55:08 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 58, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:55:11 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 77, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:55:14 {'cpu_rpm': 2645, 'cpu_%': 35, 'cpu_C': 58, 'gpu_rpm': 2232, 'gpu_%': 0, 'gpu_C': 50}
+   21:55:17 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 423, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:20 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 58, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:55:23 {'cpu_rpm': 2645, 'cpu_%': 35, 'cpu_C': 58, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:55:26 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 57, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:29 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 77, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:32 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 60, 'gpu_rpm': 0, 'gpu_%': 35, 'gpu_C': 49}
+   21:55:35 {'cpu_rpm': 2645, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 1219, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:38 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 270, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:41 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 75, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:44 {'cpu_rpm': 2645, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 1214, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:47 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 305, 'gpu_%': 0, 'gpu_C': 49}
+21:55:47 == güvenli dönüş (mod 0 + 0x69)
+   21:55:50 {'cpu_rpm': 3242, 'cpu_%': 40, 'cpu_C': 59, 'gpu_rpm': 2253, 'gpu_%': 35, 'gpu_C': 49}
+   21:55:53 {'cpu_rpm': 2678, 'cpu_%': 35, 'cpu_C': 61, 'gpu_rpm': 1228, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:56 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 331, 'gpu_%': 0, 'gpu_C': 49}
+   21:55:59 {'cpu_rpm': 2662, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 49}
+   21:56:02 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 74, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 49}
+   21:56:05 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 60, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 49}
+   21:56:08 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 49}
+   21:56:11 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 33, 'gpu_C': 49}
+   21:56:14 {'cpu_rpm': 2652, 'cpu_%': 35, 'cpu_C': 59, 'gpu_rpm': 1213, 'gpu_%': 0, 'gpu_C': 49}
+   21:56:17 {'cpu_rpm': 2655, 'cpu_%': 35, 'cpu_C': 81, 'gpu_rpm': 398, 'gpu_%': 0, 'gpu_C': 49}
