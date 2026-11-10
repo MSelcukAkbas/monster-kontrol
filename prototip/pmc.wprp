@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ETW donanım sayaçları (PMC): her bağlam geçişinde komut/çevrim/LLC sayımları. wpr -start pmc.wprp -filemode -->
+<WindowsPerformanceRecorder Version="1.0" Author="monster-kontrol">
+  <Profiles>
+    <SystemCollector Id="SC" Name="NT Kernel Logger">
+      <BufferSize Value="1024" />
+      <Buffers Value="64" />
+    </SystemCollector>
+    <SystemProvider Id="SP">
+      <Keywords>
+        <Keyword Value="ProcessThread" />
+        <Keyword Value="CSwitch" />
+      </Keywords>
+    </SystemProvider>
+    <HardwareCounter Id="HC">
+      <Counters>
+        <Counter Value="InstructionRetired" />
+        <Counter Value="UnhaltedCoreCycles" />
+        <Counter Value="LLCReference" />
+        <Counter Value="LLCMisses" />
+      </Counters>
+      <Events>
+        <Event Value="CSwitch" />
+      </Events>
+    </HardwareCounter>
+    <Profile Id="PMC.Verbose.File" Name="PMC" Description="PMC deneme" LoggingMode="File" DetailLevel="Verbose">
+      <Collectors>
+        <SystemCollectorId Value="SC">
+          <SystemProviderId Value="SP" />
+          <HardwareCounterId Value="HC" />
+        </SystemCollectorId>
+      </Collectors>
+    </Profile>
+  </Profiles>
+</WindowsPerformanceRecorder>

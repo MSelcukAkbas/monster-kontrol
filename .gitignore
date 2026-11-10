@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.etl
+TestResults/
+.remember/
+publish/
+
+__pycache__/

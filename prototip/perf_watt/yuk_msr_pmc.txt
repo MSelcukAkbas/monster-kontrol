@@ -1,0 +1,12 @@
+wpr start:  (çıkış 0)
+ 0. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 10°C
+ 1. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 10°C
+ 2. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 10°C
+ 3. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 10°C
+wpr stop: Press Ctrl+C to cancel the stop operation. The trace was successfully saved. (çıkış 0)
+ 4. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 11°C
+ 5. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 9°C
+ 6. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 13°C
+ 7. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 9°C
+ 8. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 11°C
+ 9. 0x64F ham 00000000  ŞİMDİ []  GEÇMİŞ []  | 0x1B1 sınıra 12°C

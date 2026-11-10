@@ -1,0 +1,15 @@
+0x606 RAPL birimleri: ham A0E03  güç birimi 0,125 W, zaman birimi 0,0009765625 s
+0xCE PLATFORM_INFO: taban oran 24 (= 2400 MHz)
+0x1AD TURBO oranları 1/2/3/4 çekirdek: 41/41/40/40 (x100 MHz)
+0x1A2 TEMPERATURE_TARGET: TjMax 100°C, TCC ofset 10 → etkin sınır 90°C (ham A640000)
+0x601 VR akım sınırı: 0 A (kilit 0)
+[mevcut] PL1 45 W (açık 1, pencere 28,0 s)  PL2 107 W (açık 1)  kilit 0
+      0x64F kısma ŞİMDİ: []  GEÇMİŞ: []   0x1B1 paket termal: durum 0 geçmiş 1, PROCHOT 0, sınıra 11°C
+[sessiz] PL1 15 W (açık 1, pencere 8,0 s)  PL2 30 W (açık 1)  kilit 0
+      0x64F kısma ŞİMDİ: []  GEÇMİŞ: []   0x1B1 paket termal: durum 0 geçmiş 1, PROCHOT 0, sınıra 13°C
+[tasarruf] PL1 30 W (açık 1, pencere 8,0 s)  PL2 30 W (açık 1)  kilit 0
+      0x64F kısma ŞİMDİ: []  GEÇMİŞ: []   0x1B1 paket termal: durum 1 geçmiş 1, PROCHOT 0, sınıra 15°C
+[eglence] PL1 45 W (açık 1, pencere 28,0 s)  PL2 107 W (açık 1)  kilit 0
+      0x64F kısma ŞİMDİ: []  GEÇMİŞ: []   0x1B1 paket termal: durum 0 geçmiş 1, PROCHOT 0, sınıra 11°C
+[performans] PL1 60 W (açık 1, pencere 48,0 s)  PL2 135 W (açık 1)  kilit 0
+      0x64F kısma ŞİMDİ: []  GEÇMİŞ: []   0x1B1 paket termal: durum 0 geçmiş 1, PROCHOT 0, sınıra 7°C

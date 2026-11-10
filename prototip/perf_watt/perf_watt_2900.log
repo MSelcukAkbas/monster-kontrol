@@ -1,0 +1,18 @@
+=== Sınır: 2900 (20s soğuma)
+  [2900]    3s yük %100.0   2902 MHz  62°C  fan 3963/3267
+  [2900]    6s yük %100.0   2900 MHz  63°C  fan 3963/3267
+  [2900]    9s yük %100.0   2900 MHz  64°C  fan 3963/3267
+  [2900]   12s yük %100.0   2900 MHz  64°C  fan 3963/3267
+  [2900]   15s yük %100.0   2900 MHz  64°C  fan 3970/3267
+  [2900]   18s yük %100.0   2900 MHz  64°C  fan 3963/3267
+  [2900]   21s yük %100.0   2900 MHz  64°C  fan 3970/3267
+  [2900]   24s yük %100.0   2900 MHz  64°C  fan 3963/3262
+  [2900]   27s yük %100.0   2900 MHz  65°C  fan 3970/3267
+  [2900]   30s yük %100.0   2900 MHz  65°C  fan 3985/3267
+  [2900]   33s yük %100.0   2900 MHz  65°C  fan 3970/3272
+  [2900]   36s yük %100.0   2900 MHz  65°C  fan 3985/3267
+  [2900]   39s yük %100.0   2900 MHz  65°C  fan 3985/3272
+  [2900]   43s yük %100.0   2900 MHz  65°C  fan 3970/3276
+  -> {'sinir': 2900, 'puan': 23.7, 'mhz': 2900, 'C_ort': 64.2, 'C_max': 65, 'yuk': 100.0, 'fan_cpu': 3970, 'fan_gpu': 3268, 'durdu': False}
+Frekans sınırı kaldırıldı, Dengeli plan açık
+SONUC_JSON [{"sinir": 2900, "puan": 23.7, "mhz": 2900, "C_ort": 64.2, "C_max": 65, "yuk": 100.0, "fan_cpu": 3970, "fan_gpu": 3268, "durdu": false}]

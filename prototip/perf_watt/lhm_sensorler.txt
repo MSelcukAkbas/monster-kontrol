@@ -1,0 +1,35 @@
+Voltage      CPU Core                            1,1258545
+Voltage      CPU Core #1                         1,1195068
+Voltage      CPU Core #2                         1,1235352
+Voltage      CPU Core #3                         1,1335449
+Voltage      CPU Core #4                         1,119873
+Power        CPU Cores                           7,443515
+Power        CPU Memory                          1,61791
+Power        CPU Package                         10,860052
+Power        CPU Platform                        27,274519
+Clock        Bus Speed                           100,01028
+Clock        CPU Core #1                         3700,3801
+Clock        CPU Core #2                         4000,411
+Clock        CPU Core #3                         4000,411
+Clock        CPU Core #4                         4000,411
+Temperature  Core Average                        46,75
+Temperature  Core Max                            47
+Temperature  CPU Core #1                         47
+Temperature  CPU Core #1 Distance to TjMax       53
+Temperature  CPU Core #2                         47
+Temperature  CPU Core #2 Distance to TjMax       53
+Temperature  CPU Core #3                         47
+Temperature  CPU Core #3 Distance to TjMax       53
+Temperature  CPU Core #4                         46
+Temperature  CPU Core #4 Distance to TjMax       54
+Temperature  CPU Package                         47
+Load         CPU Core #1 Thread #1               16,67
+Load         CPU Core #1 Thread #2               16,67
+Load         CPU Core #2 Thread #1               33,33
+Load         CPU Core #2 Thread #2               16,67
+Load         CPU Core #3 Thread #1               16,67
+Load         CPU Core #3 Thread #2               0
+Load         CPU Core #4 Thread #1               16,67
+Load         CPU Core #4 Thread #2               0
+Load         CPU Core Max                        33,33
+Load         CPU Total                           14,58

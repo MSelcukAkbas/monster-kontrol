@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/klavye/">
+    <Project Path="klavye/MonsterKlavye.Duman/MonsterKlavye.Duman.csproj" />
+    <Project Path="klavye/MonsterKlavye.Tests/MonsterKlavye.Tests.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="klavye/MonsterKlavye/MonsterKlavye.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/ortak/">
+    <Project Path="ortak/MonsterKontrol.Dchu.Tests/MonsterKontrol.Dchu.Tests.csproj" />
+    <Project Path="ortak/MonsterKontrol.Dchu/MonsterKontrol.Dchu.csproj" />
+  </Folder>
+</Solution>
