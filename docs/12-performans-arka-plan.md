@@ -91,6 +91,8 @@ Kullanıcı CC'de custom eğriyi değiştirdi (CPU 53°C → %98, GPU 61°C → 
 - **Kapı A bu yüzden geçersizdi:** yalnız bayt 18'i (nokta) değiştirdik, eğimleri (30, 32) güncellemedik; EC 60–80°C'yi eski eğimle hesapladı. Ayrıca yük patlamalıydı.
 - 20–21 / 26–27 (50,99 / 60,80) değişmedi — anlamı bilinmiyor. CC ayrıca 53–60, 64, 68, 81–82'yi değiştirdi (başka ayarlar olabilir).
 - **Kapı A' (2026-11-10) ❌ — EC sayfa 4'ü çalışırken okumuyor.** CC kapalı, servis açık, hafif yük. Tutarlı test eğrisi (35/45/60/100 @ 40/60/80/100, eğimler 20/31/82) sayfa 4'e yazıldı (geri okumada doğru), sonra mod 6. CPU 67–75°C'de fan 60 sn boyunca **%98–99** kaldı: test eğrisi ~%52 verirdi, kullanıcının CC eğrisi %98. EC, CC'nin en son ittiği eğriyi tutuyor; sayfa 4 yalnız CC'nin kaydı. Eğriyi EC'ye CC başka bir çağrıyla gönderiyor (aday: `SetDCHU_DataEx(4, …)` alt komutları). Sayfa yedekten geri yazıldı, taze okumayla birebir doğrulandı; fan mod 0 + `0x69` → %35. Kayıt `prototip/kayit/testA2.log`.
+- **Gönderen bulundu: `FanSpeedSetting.exe`** (CC'nin ayrı .NET uygulaması, 7.87, `WindowsApps\CLEVOCO.504814C03D814_…\FanSpeedSetting\`). Açılışta sayfa 4'ü okur, eğriyi **`SetDCHU_Data(14, 256 bayt)`** ile EC'ye gönderir (metot 600001C; düzen doc 01). EC'nin etkin eğrisi **`GetDCHU_Data_Buffer(13)`** ile okunur (bayt 16–31). Açılışta sayfa 4 ofset 81–82'ye de yazdı (0,0 → 1,255; anlamı bilinmiyor).
+- **Kapı A'' (2026-11-10) ✅ — eğriyi biz yazabiliyoruz, NVRAM'a dokunmadan.** `prototip/testE_egri14.py`: sayfa 4'ten hesaplanan komut 14 tamponu EC'dekiyle birebir tuttu (kendini sınama). CPU'ya fabrika eğrisi gönderildi → tampon 13 hemen (60,128) gösterdi → custom modda 60–65°C'de fan %50–66 (kullanıcı eğrisiyle %98), 80°C'de %94–99. Kullanıcı eğrisi geri gönderildi, tampon 13 nokta nokta aynı; fan otomatik. Kayıt `prototip/kayit/testE_egri14.log`.
 
 ## 2. Mimari sonuç (03'teki "test 8'e bağlı" kararı)
 
@@ -110,11 +112,13 @@ Kullanıcı CC'de custom eğriyi değiştirdi (CPU 53°C → %98, GPU 61°C → 
 
 | # | Soru | Yöntem | Onay |
 |---|---|---|---|
-| A | ⏳ **Eğriyi biz yazabiliyor muyuz?** A' ❌: sayfa 4 yazılıyor ama EC çalışırken okumuyor; CC eğriyi başka çağrıyla itiyor. Kalan yollar: (1) CC'de eğri kaydederken hangi DCHU çağrısının gittiğini yakalamak (API izleme), (2) sayfa 4'ü değiştir → **yeniden başlat** → EC açılışta okuyor mu (B ile birlikte). Olumsuzsa CC'nin bıraktığı eğriyle yaşanır | Sayfa 4 yaz → mod 6 → EC izliyor mu → yedekten geri yaz (A' bunu yaptı) | ⚠️ firmware/NVRAM yazması, kullanıcı onayı |
-| B | **Custom mod kalıcı mı?** | Uyku → uyanma, yeniden başlatma sonrası duty sıcaklığı izliyor mu; sayfa 4 ofset 5 (CC'nin mod kaydı) açılışta uygulanıyor mu | Kullanıcı (yeniden başlatma) |
+| A | ✅ **Eğriyi biz yazabiliyor muyuz?** Evet: `SetDCHU_Data(14)` (A''), doğrulama `GetDCHU_Data_Buffer(13)`. Sayfa 4 yalnız CC'nin kaydı (A' ❌). Açık: EC belleği geçici → uyku/yeniden başlatmada eğri kalıyor mu (B) | Komut 14 gönder → tampon 13 oku → mod 6 → geri gönder | Fan yazması, kullanıcı onayı |
+| B | **Custom mod kalıcı mı?** Kullanıcı gözlemi (ölçülmedi): CC'de custom eğri seçiliyken bilgisayar kapanıp açılınca otomatik moda dönüyor → uygulama açılışta (ve büyük olasılıkla uyanmada) mod 6 + komut 14'ü yeniden göndermeli | Uyku → uyanma, yeniden başlatma sonrası duty sıcaklığı izliyor mu; sayfa 4 ofset 5 (CC'nin mod kaydı) açılışta uygulanıyor mu | Kullanıcı (yeniden başlatma) |
 | C | ✅ **EC** — servis kapalıyken de eğri izleniyor | Test 20: servis durdurulmuşken custom eğri | 🔐 |
 | D | **Eğri tasarımı** | EC histerezissiz ve ham bayt 18'i izliyor → 70–88°C bandında yatık eğri, taban yüksek; test 21 (dB↔RPM) ile rezonans aralıkları | — |
 | E | **GPU yükünde** | Test 17: GPU fanı neyi izliyor, CPU fanı GPU ısısına tepki veriyor mu (ortak boru) | — |
+
+**Kapı A olumlu (A''):** uygulama profil değişiminde, açılışta ve uyanmada kendi eğrisini komut 14 ile gönderir, tampon 13 ile geri okur; NVRAM'a yazmaz. Aşağıdaki "olumsuz" seçeneği yedek olarak duruyor.
 
 **Kapı A olumsuz çıkarsa mimari:** katman 0 yine EC custom + **fabrika eğrisi** (35/50/99 @ 40/60/80 — mod 0'ın düz %35'inden çok daha iyi). Eğriyi biçimlendirmek isteyen profiller uygulama çalışırken `0x68` kullanır; uygulama kapanırken/çökünce `0x69` → custom eğriye düşer (8b). Çökmede `0x68` asılı kalır → o profillerde küçük bekçi gerekir.
 
