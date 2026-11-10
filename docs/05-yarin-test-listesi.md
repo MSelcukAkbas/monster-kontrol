@@ -27,7 +27,7 @@ Komutlar `prototip/` klasöründen çalıştırılır.
 | 24 | **ETW PMC çözümü** (10) | TraceEvent ile `pmc.etl` → IPC/LLC; LHM kapalıyken `PmcCtrConrruption` | IPC gerçekten okunabiliyor mu |
 | 25 | **PresentMon FPS** (10) | Oyunda yönetici olmadan/ile | Oyun için gerçek performans vekili |
 | 19 | **Firmware otomatiği temiz koşulda** (09) | Soğuk açılış, **hiçbir DCHU yazması yapmadan**, 5–10 dk tam yük, 4 profil | "%35'te kalıyor" bizim yazmalarımızın yan etkisi mi? |
-| 20 | **CCDCHUService durdurulunca** (09) | 🔐 servis durdur → `oku.py`, Fn tuşları, Fn+ışık sonrası renk → servisi başlat | İkinci yazar riski |
+| 20 | **CCDCHUService durdurulunca** (09) | 🔐 servis durdur → `oku.py`, Fn tuşları, Fn+ışık sonrası renk → servisi başlat | İkinci yazar riski ✅ 2026-11-10 (yalnız fan kısmı): servis kapalıyken custom eğriyi EC uyguluyor ([12](12-performans-arka-plan.md)); Fn tuşları denenmedi |
 | 21 | **Fan gürültüsü** (09) | Telefonla dB ölçer; %10…%100 adımları, rezonans yapan RPM aralıkları | Eğri o aralıkları atlar |
 | 22 | **Undervolt kilidi** (09, opsiyonel) | ThrottleStop ile yalnız okuma (kullanıcı onayıyla, uygulama dışı) | Kilitli değilse güç azaltmanın en etkili yolu |
 | 26 | **İki süreçten eşzamanlı DLL** (03) | Süreç A tampon 12'yi 1 Hz okur, süreç B 15 kare/sn renk yazar, 10 dk | Çökme / bozuk okuma yoksa iki uygulama bağımsız; varsa `Global\MonsterKontrolDchu` mutex'i ✅ kısmi: 10 dk, sorun yok ([12](12-performans-arka-plan.md)) |

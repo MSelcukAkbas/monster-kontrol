@@ -45,6 +45,22 @@ Ham veri: `prototip/kayit/2026-11-10_gercek_yuk.csv` (1 Hz, `etiket` sütunu = t
 - **NVML:** GPU uykudayken sıcaklık/kullanım "Unknown Error" (nvidia-smi 261/271 örnek), güç 4–9 W yine okunuyor; P8. Okuma GPU'yu uyandırmıyor gibi.
 - **"Güvenli durum" serin değil:** firmware otomatiği (%35) gerçek yükte CPU'yu 90°C TCC platosunda tutuyor. İşlemci kendini koruyor ama sürekli 90°C.
 
+### Kapı A + C (21:34–21:36, CCDCHUService durdurulmuş)
+
+Betikler `prototip/testA_egri.py` + `testA_geri.py` (geri yükleme ayrı süreçte), kayıt `prototip/kayit/testA.log`. Yük artık hafifti (CPU 59–88°C, patlamalı).
+
+| Adım | Sonuç |
+|---|---|
+| A1 servis kapalı, custom, eski eğri | CPU fanı %49–88, sıcaklığı izliyor → **eğriyi EC uyguluyor, servis değil (test 20 ✅)** |
+| A2 aynı baytları yaz (`WriteAppSettings(4,16,12)`) | ret 1, sayfa değişmedi |
+| A3 bayt 18: 99→55, mod 6 | ret 1, geri okumada yalnız (18, 99→55). **EC yeni eğriyi almadı:** 62°C'de %96, 87°C'de %99 (yeni eğriyle 80°C altı en çok %55, %99 için ~99°C gerekirdi) |
+| A4 mod 0 → 6 yeniden tetik | Değişmedi: 61°C'de %89 |
+| Geri yükleme | ret 1; taze süreçte sayfa 4 = yedek ✅; mod 0 + `0x69` → %35/%35 ✅ |
+
+- **`WriteAppSettings` çalışıyor ve kısmi ofset yazıyor** (ret 1 = yazıldı; okuma 4096 döndürüyordu), ama sayfa 4 **EC'nin kullandığı eğri değil**: EC eğriyi kendi RAM'inde tutuyor. Sayfa 4 ya açılışta EC'ye yükleniyor (kapı B: yaz → yeniden başlat) ya da CC eğriyi başka bir SetDCHU komutuyla gönderiyor (CC'nin IL'inde mod 6'dan önceki komutlar aranmalı).
+- **GPU fanı:** servis kapalı + custom'da %0 / 0 RPM (bayt 17 = 50–51°C); servis açıkken (8) 53–55°C'de %52–55 idi. Fark sıcaklık eşiği de olabilir, servis de. ❓
+- Profil ve güç planı bu testte değişmedi (Eğlence, Dengeli).
+
 ## 2. Mimari sonuç (03'teki "test 8'e bağlı" kararı)
 
 **EC fan denetçisi olabilir.** Bu, 03'teki servis/bekçi gerekçesinin çoğunu kaldırıyor: uygulama ölse, Görev Yöneticisi'nden öldürülse, oturum kapansa da fan EC eğrisini izler.
@@ -63,9 +79,9 @@ Ham veri: `prototip/kayit/2026-11-10_gercek_yuk.csv` (1 Hz, `etiket` sütunu = t
 
 | # | Soru | Yöntem | Onay |
 |---|---|---|---|
-| A | **Eğriyi biz yazabiliyor muyuz?** | Sayfa 4'ün mevcut baytlarını oku → aynısını `WriteAppSettings` ile yaz (etkisiz yazma) → tek noktayı değiştir → mod 6 → EC yeni eğriyi izliyor mu → eski baytları geri yaz | ⚠️ firmware/NVRAM yazması, kullanıcı onayı |
+| A | ⏳ **Eğriyi biz yazabiliyor muyuz?** Sayfa 4'e yazılıyor ama EC hemen almıyor (§1 Kapı A) — CC'nin eğri komutu bulunmalı ya da B ile birlikte | Sayfa 4'ün mevcut baytlarını oku → aynısını `WriteAppSettings` ile yaz (etkisiz yazma) → tek noktayı değiştir → mod 6 → EC yeni eğriyi izliyor mu → eski baytları geri yaz | ⚠️ firmware/NVRAM yazması, kullanıcı onayı |
 | B | **Custom mod kalıcı mı?** | Uyku → uyanma, yeniden başlatma sonrası duty sıcaklığı izliyor mu; sayfa 4 ofset 5 (CC'nin mod kaydı) açılışta uygulanıyor mu | Kullanıcı (yeniden başlatma) |
-| C | **EC mi, CCDCHUService mi?** | Test 20: servis durdurulmuşken custom eğri | 🔐 |
+| C | ✅ **EC** — servis kapalıyken de eğri izleniyor | Test 20: servis durdurulmuşken custom eğri | 🔐 |
 | D | **Eğri tasarımı** | EC histerezissiz ve ham bayt 18'i izliyor → 70–88°C bandında yatık eğri, taban yüksek; test 21 (dB↔RPM) ile rezonans aralıkları | — |
 | E | **GPU yükünde** | Test 17: GPU fanı neyi izliyor, CPU fanı GPU ısısına tepki veriyor mu (ortak boru) | — |
 

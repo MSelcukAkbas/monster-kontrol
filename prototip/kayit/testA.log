@@ -1,0 +1,51 @@
+21:34:02 == A1 custom, mevcut eğri (35/50/99 @ 40/60/80)
+   21:34:05 {'cpu_rpm': 3660, 'cpu_%': 65, 'cpu_C': 73, 'gpu_rpm': 752, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:08 {'cpu_rpm': 4520, 'cpu_%': 72, 'cpu_C': 64, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:11 {'cpu_rpm': 4707, 'cpu_%': 88, 'cpu_C': 70, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:14 {'cpu_rpm': 4813, 'cpu_%': 74, 'cpu_C': 66, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:17 {'cpu_rpm': 4278, 'cpu_%': 60, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:20 {'cpu_rpm': 3636, 'cpu_%': 53, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:23 {'cpu_rpm': 3836, 'cpu_%': 60, 'cpu_C': 64, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:26 {'cpu_rpm': 3993, 'cpu_%': 64, 'cpu_C': 63, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:29 {'cpu_rpm': 3809, 'cpu_%': 49, 'cpu_C': 63, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:32 {'cpu_rpm': 3857, 'cpu_%': 67, 'cpu_C': 78, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+A2 etkisiz yazma ret: 1 fark: []
+A3 80°C noktası 99→55 ret: 1 fark: [(18, 99, 55)]
+21:34:33 == A3 custom, 80°C noktası %55 — 90°C'de ~%80 (100°C noktası kullanılıyorsa) ya da %55 beklenir
+   21:34:36 {'cpu_rpm': 5061, 'cpu_%': 83, 'cpu_C': 68, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:34:39 {'cpu_rpm': 4657, 'cpu_%': 69, 'cpu_C': 73, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:34:42 {'cpu_rpm': 5109, 'cpu_%': 99, 'cpu_C': 62, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:45 {'cpu_rpm': 5208, 'cpu_%': 85, 'cpu_C': 67, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:48 {'cpu_rpm': 4739, 'cpu_%': 71, 'cpu_C': 63, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:34:51 {'cpu_rpm': 4162, 'cpu_%': 57, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:54 {'cpu_rpm': 3823, 'cpu_%': 60, 'cpu_C': 66, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:34:57 {'cpu_rpm': 4037, 'cpu_%': 55, 'cpu_C': 66, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:00 {'cpu_rpm': 4037, 'cpu_%': 60, 'cpu_C': 62, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:03 {'cpu_rpm': 3654, 'cpu_%': 55, 'cpu_C': 68, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:06 {'cpu_rpm': 4130, 'cpu_%': 62, 'cpu_C': 65, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:09 {'cpu_rpm': 4244, 'cpu_%': 75, 'cpu_C': 74, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:12 {'cpu_rpm': 5310, 'cpu_%': 96, 'cpu_C': 62, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:15 {'cpu_rpm': 5146, 'cpu_%': 82, 'cpu_C': 71, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:18 {'cpu_rpm': 4637, 'cpu_%': 77, 'cpu_C': 88, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:21 {'cpu_rpm': 5404, 'cpu_%': 99, 'cpu_C': 87, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:24 {'cpu_rpm': 5363, 'cpu_%': 89, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:27 {'cpu_rpm': 4867, 'cpu_%': 75, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:35:30 {'cpu_rpm': 4347, 'cpu_%': 61, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 51}
+   21:35:33 {'cpu_rpm': 3717, 'cpu_%': 47, 'cpu_C': 59, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+21:35:34 == A4 mod 0 → 6 yeniden tetik
+   21:35:37 {'cpu_rpm': 3433, 'cpu_%': 49, 'cpu_C': 63, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:40 {'cpu_rpm': 4091, 'cpu_%': 73, 'cpu_C': 78, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:43 {'cpu_rpm': 5272, 'cpu_%': 89, 'cpu_C': 61, 'gpu_rpm': 0, 'gpu_%': 35, 'gpu_C': 50}
+   21:35:46 {'cpu_rpm': 4900, 'cpu_%': 75, 'cpu_C': 64, 'gpu_rpm': 1216, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:49 {'cpu_rpm': 4338, 'cpu_%': 61, 'cpu_C': 60, 'gpu_rpm': 297, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:52 {'cpu_rpm': 3698, 'cpu_%': 53, 'cpu_C': 63, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:55 {'cpu_rpm': 3692, 'cpu_%': 56, 'cpu_C': 62, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+   21:35:58 {'cpu_rpm': 3769, 'cpu_%': 75, 'cpu_C': 82, 'gpu_rpm': 0, 'gpu_%': 35, 'gpu_C': 50}
+   21:36:01 {'cpu_rpm': 4900, 'cpu_%': 76, 'cpu_C': 66, 'gpu_rpm': 739, 'gpu_%': 0, 'gpu_C': 50}
+   21:36:04 {'cpu_rpm': 4382, 'cpu_%': 77, 'cpu_C': 67, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+test çıkış 0
+geri öncesi fark: [(18, 99, 55)]
+geri yazma ret: 1
+21:36:05 güvenli durum: {'cpu_rpm': 4382, 'cpu_%': 77, 'cpu_C': 67, 'gpu_rpm': 0, 'gpu_%': 0, 'gpu_C': 50}
+TAZE OKUMA: yedekle ayni
+BITTI
