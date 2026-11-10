@@ -1,0 +1,66 @@
+<UserControl x:Class="MonsterKlavye.Sayfalar.AyarlarSayfasi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <UserControl.Resources>
+        <Style x:Key="Satir" TargetType="Border" BasedOn="{StaticResource Kart}">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="18,14" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+        </Style>
+        <Style x:Key="Bolum" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,12,0,8" />
+        </Style>
+        <Style x:Key="Aciklama" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel Margin="36,28,36,28">
+        <TextBlock Text="Ayarlar" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,8" />
+
+        <TextBlock Text="Başlangıç" Style="{StaticResource Bolum}" />
+        <Border Style="{StaticResource Satir}">
+            <DockPanel>
+                <ui:ToggleSwitch x:Name="Baslat" DockPanel.Dock="Right" Checked="Baslat_Click" Unchecked="Baslat_Click"
+                                 AutomationProperties.Name="Windows ile başlat" />
+                <StackPanel>
+                    <TextBlock Text="Windows ile başlat" FontSize="14" />
+                    <TextBlock Text="Oturum açılınca tepside başlar, son rengi uygular" Style="{StaticResource Aciklama}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+        <Border Style="{StaticResource Satir}">
+            <DockPanel>
+                <ui:ToggleSwitch x:Name="Tepsi" DockPanel.Dock="Right" Checked="Tepsi_Click" Unchecked="Tepsi_Click"
+                                 AutomationProperties.Name="Kapatınca tepsiye küçült" />
+                <StackPanel>
+                    <TextBlock Text="Kapatınca tepsiye küçült" FontSize="14" />
+                    <TextBlock Text="Efektler pencere kapalıyken de çalışır. Kapalıysa pencereyi kapatmak uygulamadan çıkar."
+                               Style="{StaticResource Aciklama}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <TextBlock Text="Donanım" Style="{StaticResource Bolum}" />
+        <Border Style="{StaticResource Satir}">
+            <DockPanel>
+                <Ellipse x:Name="DurumNoktasi" Width="10" Height="10" Margin="0,0,14,0" Fill="#2BD96B" />
+                <ui:Button DockPanel.Dock="Right" Content="Şimdi yeniden uygula" Margin="14,0,0,0"
+                           Click="YenidenUygula_Click" />
+                <StackPanel>
+                    <TextBlock x:Name="DonanimBaslik" Text="Clevo sürücüsü bulundu · tek bölgeli RGB klavye" FontSize="14" />
+                    <TextBlock x:Name="DonanimAyrinti" Style="{StaticResource Aciklama}" FontFamily="Consolas"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <TextBlock Text="Monster Klavye · performans uygulamasından bağımsız çalışır" Margin="0,14,0,0"
+                   FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+    </StackPanel>
+</UserControl>

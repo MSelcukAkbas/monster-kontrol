@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -174,8 +174,9 @@ public partial class EfektlerSayfasi : UserControl
 
     void Yenile()
     {
-        var ayar = _ayarlar[_secili];
         var etkin = Motor.Efekt;
+        if (!ReferenceEquals(etkin, Efektler.Sabit)) _ayarlar[etkin] = Motor.Ayarlar; // tepsiden seçilen efektin ayarı da görünsün
+        var ayar = _ayarlar[_secili];
 
         foreach (var k in _kartlar)
         {
@@ -241,7 +242,7 @@ public partial class EfektlerSayfasi : UserControl
     {
         var dt = Math.Min(_saat.Elapsed.TotalSeconds, 0.1);
         _saat.Restart();
-        if (Window.GetWindow(this) is { WindowState: WindowState.Minimized }) return;
+        if (!IsVisible || Window.GetWindow(this) is { WindowState: WindowState.Minimized }) return; // tepsiye gizliyken de çizme
 
         foreach (var k in _kartlar.Where(k => k.Canli))
         {

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls;
 using MonsterKlavye.Sayfalar;
 using Wpf.Ui.Controls;
@@ -9,6 +10,7 @@ public partial class MainWindow : FluentWindow
 {
     readonly IsikSayfasi _isik = new();
     readonly EfektlerSayfasi _efektler = new(); // tek örnek: seçim ve ayarlar menü değişince kaybolmasın
+    AyarlarSayfasi? _ayarlar;
 
     public MainWindow()
     {
@@ -33,17 +35,23 @@ public partial class MainWindow : FluentWindow
         {
             "isik" => _isik,
             "efektler" => _efektler,
-            _ => YakindaSayfasi("Ayarlar", "Ayarlar K4'te gelecek: Windows ile başlat, tepsi, uyku zamanlayıcısı."),
+            _ => _ayarlar ??= new AyarlarSayfasi(),
         };
     }
 
-    static UIElement YakindaSayfasi(string baslik, string aciklama) => new StackPanel
+    protected override void OnClosing(CancelEventArgs e)
     {
-        Margin = new Thickness(28, 22, 28, 22),
-        Children =
+        if (App.TepsiyeKucult && !App.Cikiliyor)
         {
-            new System.Windows.Controls.TextBlock { Text = baslik, FontSize = 28, FontWeight = FontWeights.SemiBold },
-            new System.Windows.Controls.TextBlock { Text = aciklama, Margin = new Thickness(0, 8, 0, 0), Opacity = 0.8 },
-        },
-    };
+            e.Cancel = true; // efekt tepside sürer
+            Hide();
+        }
+        base.OnClosing(e);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        if (!App.Cikiliyor) App.Cik(); // tepsiye küçültme kapalıysa pencereyi kapatmak çıkıştır
+    }
 }
