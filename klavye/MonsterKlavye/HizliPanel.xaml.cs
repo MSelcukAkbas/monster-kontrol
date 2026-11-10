@@ -22,8 +22,8 @@ public partial class HizliPanel : Window
         {
             var d = new Button
             {
-                Style = (Style)FindResource("RenkDugmesi"),
-                Width = 26, Height = 26, Margin = new Thickness(0),
+                Style = (Style)FindResource("PanelRengi"),
+                Margin = new Thickness(3, 0, 3, 0),
                 Background = new SolidColorBrush(Color.FromRgb(renk.R, renk.G, renk.B)),
                 ToolTip = ad,
                 DataContext = renk,

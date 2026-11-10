@@ -134,11 +134,7 @@
 
                     <StackPanel x:Name="RenkPaneli" Margin="0,14,0,0">
                         <TextBlock Text="Renk (Işık sayfasıyla ortak)" FontSize="13" Foreground="#C8C8CC" />
-                        <ItemsControl x:Name="Renkler" Margin="0,10,0,0" Focusable="False">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
+                        <StackPanel x:Name="Renkler" Orientation="Horizontal" Margin="0,10,0,0" /> <!-- ItemsControl değil: UIA -->
                     </StackPanel>
 
                     <Border x:Name="Uyari" Background="#4A3416" CornerRadius="8" Padding="10,8" Margin="0,14,0,0">

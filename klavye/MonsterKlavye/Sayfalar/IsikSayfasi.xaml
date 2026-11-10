@@ -57,9 +57,9 @@
                     <TextBlock x:Name="DurumYazi" Text="Açık · %80 parlaklık" FontSize="13" Foreground="#C8C8CC" />
                 </StackPanel>
 
-                <ToggleButton x:Name="GucDugmesi" Style="{StaticResource GucDugmesi}" IsChecked="True"
+                <ToggleButton x:Name="GucDugmesi" Style="{StaticResource GucDugmesi}"
                               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,22,0"
-                              Click="Guc_Click" AutomationProperties.Name="Klavye ışığını aç veya kapat"
+                              Checked="Guc_Click" Unchecked="Guc_Click" AutomationProperties.Name="Klavye ışığını aç veya kapat"
                               ToolTip="Aç / kapat" />
 
                 <Border x:Name="KlavyeKasasi" Width="580" VerticalAlignment="Bottom" Margin="0,0,0,20"
@@ -120,11 +120,8 @@
                         </Canvas>
                     </Grid>
 
-                    <ItemsControl x:Name="Hazirlar" Margin="0,18,0,0">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
+                    <!-- ItemsControl değil: orada UIA renk düğmelerine ulaşamıyor -->
+                    <StackPanel x:Name="Hazirlar" Orientation="Horizontal" Margin="0,18,0,0" />
                 </StackPanel>
             </Border>
 

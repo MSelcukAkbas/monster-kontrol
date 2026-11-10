@@ -151,7 +151,7 @@ public partial class EfektlerSayfasi : UserControl
             };
             AutomationProperties.SetName(d, ad);
             d.Click += (_, _) => Motor.TemelAyarla(Motor.Temel with { Renk = renk, Acik = true });
-            Renkler.Items.Add(d);
+            Renkler.Children.Add(d);
         }
     }
 
@@ -201,7 +201,7 @@ public partial class EfektlerSayfasi : UserControl
         SkalaSon.Fill = new SolidColorBrush(Renk(ayar.Skala.Renk(1)));
         SkalaIz.Background = SkalaFircasi(ayar.Skala);
         foreach (Button d in SkalaDugmeleri.Children) d.Tag = ReferenceEquals(d.DataContext, ayar.Skala) ? "secili" : null;
-        foreach (Button d in Renkler.Items) d.Tag = d.DataContext is Rgb r && r == Motor.Temel.Renk ? "secili" : null;
+        foreach (Button d in Renkler.Children) d.Tag = d.DataContext is Rgb r && r == Motor.Temel.Renk ? "secili" : null;
 
         var uygulandi = ReferenceEquals(etkin, _secili) && Motor.Temel.Acik;
         UygulaDugmesi.IsEnabled = !uygulandi;

@@ -140,7 +140,7 @@ public partial class IsikSayfasi : UserControl
             };
             AutomationPropertiesAdi(dugme, ad);
             dugme.Click += (_, _) => RenkSec(renk, ad);
-            Hazirlar.Items.Add(dugme);
+            Hazirlar.Children.Add(dugme);
         }
     }
 
@@ -149,7 +149,7 @@ public partial class IsikSayfasi : UserControl
 
     void HazirSeciminiGoster()
     {
-        foreach (Button d in Hazirlar.Items)
+        foreach (Button d in Hazirlar.Children)
             d.Tag = d.DataContext is Rgb r && r == _renk ? "secili" : null;
     }
 
@@ -235,8 +235,10 @@ public partial class IsikSayfasi : UserControl
         Yenile();
     }
 
+    // Checked/Unchecked: UIA Toggle Click'i tetiklemiyor. Yenile'nin kendi IsChecked yazımı burada durur.
     void Guc_Click(object sender, RoutedEventArgs e)
     {
+        if (_acik == (GucDugmesi.IsChecked == true)) return;
         _acik = GucDugmesi.IsChecked == true;
         Yenile();
     }
