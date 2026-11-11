@@ -1,0 +1,52 @@
+<UserControl x:Class="MonsterPerformans.Sayfalar.FanSayfasi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:s="clr-namespace:MonsterPerformans.Sayfalar">
+    <Grid Margin="28,20,28,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Profil" Style="{StaticResource Etiket}" Margin="0,0,10,0" />
+                <ComboBox x:Name="ProfilKutusu" Width="220" SelectionChanged="Profil_Changed" AutomationProperties.Name="Düzenlenen profil" />
+            </StackPanel>
+            <TextBlock Text="Fan eğrisi" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </DockPanel>
+
+        <TextBlock x:Name="Bos" Grid.Row="2" Style="{StaticResource Ayrinti}" TextWrapping="Wrap" Visibility="Collapsed"
+                   Text="Özel eğri yalnız kullanıcı profillerinde var. Profiller sayfasında bir profili kopyalayın, fan modunu &quot;Özel eğri&quot; yapın." />
+
+        <DockPanel x:Name="Ust" Grid.Row="1" Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" AutomationProperties.Name="Hazır eğriler">
+                <TextBlock Text="Hazır (iki fana):" Style="{StaticResource Ayrinti}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <ui:Button Content="Sessiz" Tag="0" Click="Hazir_Click" Margin="0,0,6,0" />
+                <ui:Button Content="Dengeli" Tag="1" Click="Hazir_Click" Margin="0,0,6,0" />
+                <ui:Button Content="Serin" Tag="2" Click="Hazir_Click" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" AutomationProperties.Name="Fan seçimi">
+                <ui:Button x:Name="CpuDugmesi" Content="CPU fanı" Appearance="Primary" Click="Fan_Click" Margin="0,0,6,0" />
+                <ui:Button x:Name="GpuDugmesi" Content="GPU fanı" Click="Fan_Click" />
+            </StackPanel>
+        </DockPanel>
+
+        <Border x:Name="Cerceve" Grid.Row="2" Style="{StaticResource Kart}">
+            <s:EgriEditoru x:Name="Editor" MinHeight="260" AutomationProperties.Name="Fan eğrisi. 2 ya da 3 ile nokta seçin, oklarla taşıyın." />
+        </Border>
+
+        <TextBlock x:Name="Baytlar" Grid.Row="3" Margin="2,10,0,0" Style="{StaticResource Ayrinti}" FontFamily="Consolas" TextWrapping="Wrap" />
+
+        <DockPanel x:Name="Alt" Grid.Row="4" Margin="0,12,0,0">
+            <ui:Button x:Name="KaydetDugmesi" Content="Kaydet" Click="Kaydet_Click" Margin="0,0,8,0" />
+            <ui:Button x:Name="UygulaDugmesi" Content="Kaydet ve uygula" Appearance="Primary" Icon="{ui:SymbolIcon Play24}"
+                       Click="Uygula_Click" Margin="0,0,14,0" />
+            <TextBlock x:Name="Durum" Style="{StaticResource Ayrinti}" TextWrapping="Wrap" VerticalAlignment="Center" />
+        </DockPanel>
+    </Grid>
+</UserControl>

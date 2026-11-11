@@ -1,0 +1,87 @@
+<UserControl x:Class="MonsterPerformans.Sayfalar.AyarlarSayfasi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <UserControl.Resources>
+        <!-- Monster Klavye Ayarlar sayfasıyla aynı satır görünümü -->
+        <Style x:Key="Satir" TargetType="Border" BasedOn="{StaticResource Kart}">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="18,14" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+        </Style>
+        <Style x:Key="Bolum" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,12,0,8" />
+        </Style>
+        <Style x:Key="Aciklama" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,20,28,20">
+            <TextBlock Text="Ayarlar" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,8" />
+
+            <TextBlock Text="Başlangıç" Style="{StaticResource Bolum}" />
+            <Border Style="{StaticResource Satir}">
+                <DockPanel>
+                    <ui:ToggleSwitch x:Name="Baslat" DockPanel.Dock="Right" Checked="Baslat_Click" Unchecked="Baslat_Click"
+                                     AutomationProperties.Name="Windows ile başlat" />
+                    <StackPanel>
+                        <TextBlock Text="Windows ile başlat" FontSize="14" />
+                        <TextBlock Text="Oturum açılınca tepside başlar. Açılışta donanıma bir şey yazmaz; profil seçilene kadar fanlar donanımın otomatiğinde kalır."
+                                   Style="{StaticResource Aciklama}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <TextBlock Text="Güvenlik" Style="{StaticResource Bolum}" />
+            <Border Style="{StaticResource Satir}">
+                <DockPanel>
+                    <ui:Button x:Name="GuvenliDugmesi" DockPanel.Dock="Right" Content="Güvenli duruma dön" Margin="14,0,0,0"
+                               Icon="{ui:SymbolIcon ShieldCheckmark24}" Click="Guvenli_Click" />
+                    <StackPanel>
+                        <TextBlock Text="Güvenli durum" FontSize="14" />
+                        <TextBlock Text="Fan otomatik, güç seviyesi Eğlence, Windows planı Dengeli." Style="{StaticResource Aciklama}" />
+                        <TextBlock x:Name="GuvenliSonuc" Style="{StaticResource Aciklama}" Visibility="Collapsed" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource Satir}">
+                <StackPanel>
+                    <TextBlock Text="Çıkışta fan" FontSize="14" />
+                    <TextBlock Style="{StaticResource Aciklama}"
+                               Text="Bu oturumda fan Maksimum ya da Özel eğriye alındıysa, uygulamadan çıkarken otomatiğe döner (izleyen kalmaz)." />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="Donanım" Style="{StaticResource Bolum}" />
+            <Border Style="{StaticResource Satir}">
+                <DockPanel>
+                    <Ellipse x:Name="DchuNoktasi" Width="10" Height="10" Margin="0,0,14,0" Fill="#2BD96B" />
+                    <StackPanel>
+                        <TextBlock x:Name="DchuBaslik" Text="Clevo sürücüsü bulundu" FontSize="14" />
+                        <TextBlock x:Name="DchuAyrinti" Style="{StaticResource Aciklama}" FontFamily="Consolas" TextWrapping="NoWrap"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource Satir}">
+                <DockPanel>
+                    <Ellipse x:Name="NvmlNoktasi" Width="10" Height="10" Margin="0,0,14,0" Fill="#2BD96B" />
+                    <StackPanel>
+                        <TextBlock x:Name="NvmlBaslik" Text="NVIDIA sürücüsü (NVML) bulundu" FontSize="14" />
+                        <TextBlock Text="GPU sıcaklığı, frekansı ve gücü buradan okunur." Style="{StaticResource Aciklama}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <TextBlock Text="Monster Performans · Monster Klavye'den bağımsız çalışır" Margin="0,14,0,0"
+                       FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

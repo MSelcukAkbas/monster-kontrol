@@ -29,6 +29,24 @@ public sealed class WindowsGucPlani : IGucPlani
     public static readonly Guid FrekansSiniri = new("75b0ae3f-bce0-45a7-8c89-c9611c25e100"); // PROCFREQMAX, MHz, 0 = sınırsız
 
     const uint ZatenVar = 183;
+    public const string KopyaOnEki = "MK · ";
+
+    /// <summary>Sistemdeki planlar; uygulamanın kendi kopyaları hariç (kopyanın kopyası olmasın).</summary>
+    public static IReadOnlyList<(Guid Guid, string Ad)> Planlar()
+    {
+        var l = new List<(Guid, string)>();
+        for (uint i = 0; ; i++)
+        {
+            var b = new byte[16];
+            var n = (uint)b.Length;
+            if (PowerEnumerate(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 16 /* ACCESS_SCHEME */, i, b, ref n) != 0)
+                break; // 259 = ERROR_NO_MORE_ITEMS
+            var g = new Guid(b);
+            var ad = Ad(g);
+            if (!ad.StartsWith(KopyaOnEki, StringComparison.Ordinal)) l.Add((g, ad));
+        }
+        return l;
+    }
 
     /// <summary>Kopyanın GUID'i temelden türetilir: her açılışta yeni plan oluşmaz.</summary>
     public static Guid KopyaGuid(Guid temel) =>
@@ -48,7 +66,7 @@ public sealed class WindowsGucPlani : IGucPlani
         }
         finally { Marshal.FreeHGlobal(p); }
 
-        var ad = Encoding.Unicode.GetBytes("MK · " + Ad(temel) + "\0");
+        var ad = Encoding.Unicode.GetBytes(KopyaOnEki + Ad(temel) + "\0");
         Denetle(PowerWriteFriendlyName(IntPtr.Zero, ref kopya, IntPtr.Zero, IntPtr.Zero, ad, (uint)ad.Length), "PowerWriteFriendlyName");
         return kopya;
     }
@@ -109,5 +127,6 @@ public sealed class WindowsGucPlani : IGucPlani
     [DllImport(P)] static extern uint PowerGetActiveScheme(IntPtr kok, out IntPtr plan);
     [DllImport(P)] static extern uint PowerSetActiveScheme(IntPtr kok, ref Guid plan);
     [DllImport(P)] static extern uint PowerDeleteScheme(IntPtr kok, ref Guid plan);
+    [DllImport(P)] static extern uint PowerEnumerate(IntPtr kok, IntPtr plan, IntPtr alt, uint erisim, uint indeks, byte[] tampon, ref uint boy);
     [DllImport("kernel32.dll")] static extern IntPtr LocalFree(IntPtr p);
 }

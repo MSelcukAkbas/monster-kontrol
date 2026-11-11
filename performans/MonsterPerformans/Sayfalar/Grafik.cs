@@ -56,7 +56,7 @@ public sealed class Grafik : FrameworkElement
                 var kayma = _pencere - _veri.Count;
                 for (var i = 0; i < _veri.Count; i++)
                 {
-                    if (sec(_veri[i]) is not { } v) { acik = false; continue; } // veri yoksa çizgi kopar
+                    if (sec(_veri[i]) is not { } v) continue; // boş ölçüm atlanır, çizgi kopmaz (NVML GPU sıcaklığını aralıklı döndürür)
                     var p = new Point(sol + g * (i + kayma) / Math.Max(1, _pencere - 1), Y(v));
                     if (acik) c.LineTo(p, true, false);
                     else { c.BeginFigure(p, false, false); acik = true; }

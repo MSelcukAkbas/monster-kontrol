@@ -23,9 +23,33 @@ public partial class PanoSayfasi : UserControl
         Loaded += (_, _) =>
         {
             App.YeniOlcum += Guncelle;
+            App.DurumDegisti += Profiller;
+            Profiller();
             if (App.Gecmis.Son(1) is [var son]) Guncelle(son);
         };
-        Unloaded += (_, _) => App.YeniOlcum -= Guncelle;
+        Unloaded += (_, _) =>
+        {
+            App.YeniOlcum -= Guncelle;
+            App.DurumDegisti -= Profiller;
+        };
+    }
+
+    void Profiller()
+    {
+        ProfilDugmeleri.Children.Clear();
+        foreach (var p in App.Ayarlar.Hepsi)
+        {
+            var b = new Wpf.Ui.Controls.Button
+            {
+                Content = p.Ad,
+                Margin = new Thickness(0, 4, 8, 4),
+                Appearance = p.Ad == App.EtkinProfil ? ControlAppearance.Primary : ControlAppearance.Secondary,
+                IsEnabled = App.DonanimVar && !App.Uygulaniyor,
+            };
+            b.Click += async (_, _) => await App.Uygula(p);
+            ProfilDugmeleri.Children.Add(b);
+        }
+        Islem.Text = App.Uygulaniyor ? "Uygulanıyor…" : App.SonIslem ?? "Bu oturumda profil uygulanmadı.";
     }
 
     void Guncelle(Olcum o)
@@ -56,7 +80,7 @@ public partial class PanoSayfasi : UserControl
         Cizim.Ayarla(App.Gecmis.Son(_pencere), _pencere);
     }
 
-    static void Sicaklik(TextBlock t, int c)
+    internal static void Sicaklik(TextBlock t, int c)
     {
         t.Text = $"{c}°C";
         switch (Cekirdek.Sicaklik.Band(c))

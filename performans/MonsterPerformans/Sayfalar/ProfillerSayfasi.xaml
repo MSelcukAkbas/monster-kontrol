@@ -1,0 +1,91 @@
+<UserControl x:Class="MonsterPerformans.Sayfalar.ProfillerSayfasi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <UserControl.Resources>
+        <Style x:Key="Satir" TargetType="DockPanel">
+            <Setter Property="Margin" Value="0,0,0,14" />
+        </Style>
+        <Style x:Key="SatirEtiketi" TargetType="TextBlock" BasedOn="{StaticResource Etiket}">
+            <Setter Property="Width" Value="170" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="28,20,28,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="Profiller" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,16" />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
+                    <ui:Button x:Name="KopyalaDugmesi" Content="Kopyala" Icon="{ui:SymbolIcon Copy24}" Margin="0,0,8,0"
+                               Click="Kopyala_Click" ToolTip="Seçili profilden yeni profil" />
+                    <ui:Button x:Name="SilDugmesi" Content="Sil" Icon="{ui:SymbolIcon Delete24}" Click="Sil_Click" />
+                </StackPanel>
+                <ListBox x:Name="Liste" SelectionChanged="Liste_SelectionChanged" ItemContainerStyle="{StaticResource MenuOgesi}"
+                         Background="Transparent" BorderThickness="0" AutomationProperties.Name="Profil listesi" />
+            </DockPanel>
+
+            <Border Grid.Column="1" Style="{StaticResource Kart}" Margin="16,0,0,0" VerticalAlignment="Top">
+                <StackPanel>
+                    <TextBlock x:Name="KilitNotu" Style="{StaticResource Ayrinti}" Margin="0,0,0,14"
+                               Text="Hazır profil: ayarları kilitli. Değiştirmek için kopyalayın." />
+
+                    <StackPanel x:Name="Alanlar">
+                        <DockPanel Style="{StaticResource Satir}">
+                            <TextBlock Text="Ad" Style="{StaticResource SatirEtiketi}" />
+                            <TextBlock x:Name="AdHata" DockPanel.Dock="Bottom" Style="{StaticResource Ayrinti}" Foreground="#FF5A5F"
+                                       Visibility="Collapsed" Margin="0,4,0,0" />
+                            <ui:TextBox x:Name="AdKutusu" LostFocus="Ad_LostFocus" KeyDown="Ad_KeyDown"
+                                        AutomationProperties.Name="Profil adı" />
+                        </DockPanel>
+                        <DockPanel Style="{StaticResource Satir}">
+                            <TextBlock Text="Güç seviyesi" Style="{StaticResource SatirEtiketi}" />
+                            <ComboBox x:Name="GucKutusu" SelectionChanged="Guc_Changed" AutomationProperties.Name="Güç seviyesi" />
+                        </DockPanel>
+                        <DockPanel Style="{StaticResource Satir}">
+                            <TextBlock Text="Windows güç planı" Style="{StaticResource SatirEtiketi}" />
+                            <ComboBox x:Name="PlanKutusu" SelectionChanged="Plan_Changed" AutomationProperties.Name="Windows güç planı" />
+                        </DockPanel>
+                        <DockPanel Style="{StaticResource Satir}">
+                            <TextBlock Text="CPU frekans sınırı" Style="{StaticResource SatirEtiketi}" />
+                            <TextBlock x:Name="FrekansYazi" DockPanel.Dock="Right" Width="170" Margin="12,0,0,0" Style="{StaticResource Etiket}" />
+                            <Slider x:Name="Frekans" Minimum="30" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True"
+                                    IsMoveToPointEnabled="True" VerticalAlignment="Center" ValueChanged="Frekans_Changed"
+                                    AutomationProperties.Name="CPU frekans sınırı yüzde" />
+                        </DockPanel>
+                        <DockPanel Style="{StaticResource Satir}">
+                            <TextBlock Text="Turbo" Style="{StaticResource SatirEtiketi}" />
+                            <ui:ToggleSwitch x:Name="Turbo" Checked="Turbo_Changed" Unchecked="Turbo_Changed" AutomationProperties.Name="Turbo" />
+                        </DockPanel>
+                        <DockPanel Style="{StaticResource Satir}">
+                            <TextBlock Text="Fan modu" Style="{StaticResource SatirEtiketi}" />
+                            <ui:Button x:Name="EgriDugmesi" DockPanel.Dock="Right" Content="Eğriyi düzenle" Margin="12,0,0,0"
+                                       Icon="{ui:SymbolIcon DataLine24}" Click="Egri_Click" />
+                            <ComboBox x:Name="FanKutusu" SelectionChanged="Fan_Changed" AutomationProperties.Name="Fan modu" />
+                        </DockPanel>
+                        <DockPanel Style="{StaticResource Satir}">
+                            <TextBlock Text="Tepside göster" Style="{StaticResource SatirEtiketi}" />
+                            <CheckBox x:Name="Tepside" Checked="Tepside_Changed" Unchecked="Tepside_Changed"
+                                      Content="Tepsi panelinde düğme olarak (en fazla bir profil)" AutomationProperties.Name="Tepside göster" />
+                        </DockPanel>
+                    </StackPanel>
+
+                    <DockPanel Margin="0,6,0,0">
+                        <ui:Button x:Name="UygulaDugmesi" Content="Uygula" Appearance="Primary" Icon="{ui:SymbolIcon Play24}"
+                                   Click="Uygula_Click" Margin="0,0,14,0" />
+                        <TextBlock x:Name="Sonuc" Style="{StaticResource Ayrinti}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

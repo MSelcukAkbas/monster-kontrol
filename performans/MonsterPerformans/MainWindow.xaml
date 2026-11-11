@@ -29,19 +29,19 @@
             <DockPanel Grid.Column="0" Margin="8,4,8,8" LastChildFill="False">
                 <ListBox x:Name="Menu" DockPanel.Dock="Top" SelectionChanged="Menu_SelectionChanged" ItemContainerStyle="{StaticResource MenuOgesi}"
                          Background="Transparent" BorderThickness="0" AutomationProperties.Name="Bölümler">
-                    <ListBoxItem Tag="pano" IsSelected="True">
+                    <ListBoxItem Tag="pano" IsSelected="True" AutomationProperties.Name="Pano">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Gauge24" Margin="0,0,12,0" />
                             <TextBlock Text="Pano" VerticalAlignment="Center" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="fan">
+                    <ListBoxItem Tag="fan" AutomationProperties.Name="Fan">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="WeatherSqualls24" Margin="0,0,12,0" />
                             <TextBlock Text="Fan" VerticalAlignment="Center" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="profiller">
+                    <ListBoxItem Tag="profiller" AutomationProperties.Name="Profiller">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Options24" Margin="0,0,12,0" />
                             <TextBlock Text="Profiller" VerticalAlignment="Center" />
@@ -50,7 +50,7 @@
                 </ListBox>
                 <ListBox x:Name="AltMenu" DockPanel.Dock="Bottom" SelectionChanged="Menu_SelectionChanged" ItemContainerStyle="{StaticResource MenuOgesi}"
                          Background="Transparent" BorderThickness="0" AutomationProperties.Name="Ayarlar menüsü">
-                    <ListBoxItem Tag="ayarlar">
+                    <ListBoxItem Tag="ayarlar" AutomationProperties.Name="Ayarlar">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Settings24" Margin="0,0,12,0" />
                             <TextBlock Text="Ayarlar" VerticalAlignment="Center" />

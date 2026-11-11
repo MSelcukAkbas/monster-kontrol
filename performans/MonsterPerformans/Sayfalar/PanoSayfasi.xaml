@@ -11,13 +11,11 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Profiller: bir sonraki aşamada etkinleşir (şimdilik donanıma yazılmaz) -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
-            <TextBlock Text="Pano" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,24,0" />
-            <ui:Button Content="Sessiz" Margin="0,0,8,0" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Profiller sonraki aşamada" />
-            <ui:Button Content="Dengeli" Margin="0,0,8,0" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Profiller sonraki aşamada" />
-            <ui:Button Content="Performans" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Profiller sonraki aşamada" />
-        </StackPanel>
+        <!-- Profil düğmeleri kodda (hazır 3 + kullanıcı profilleri); tıklamak profili donanıma uygular -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Pano" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,24,4" />
+            <WrapPanel x:Name="ProfilDugmeleri" VerticalAlignment="Center" AutomationProperties.Name="Profiller" />
+        </DockPanel>
 
         <UniformGrid Grid.Row="1" Columns="4" Margin="-6,0">
             <Border Style="{StaticResource Kart}" Margin="6" AutomationProperties.Name="İşlemci">
@@ -75,6 +73,9 @@
             </Grid>
         </Border>
 
-        <TextBlock x:Name="Durum" Grid.Row="3" Margin="2,12,0,0" Style="{StaticResource Ayrinti}" Text="Ölçüm bekleniyor…" />
+        <StackPanel Grid.Row="3" Margin="2,12,0,0">
+            <TextBlock x:Name="Islem" Style="{StaticResource Ayrinti}" TextWrapping="Wrap" Margin="0,0,0,4" />
+            <TextBlock x:Name="Durum" Style="{StaticResource Ayrinti}" Text="Ölçüm bekleniyor…" />
+        </StackPanel>
     </Grid>
 </UserControl>

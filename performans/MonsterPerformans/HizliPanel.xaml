@@ -1,0 +1,38 @@
+<Window x:Class="MonsterPerformans.HizliPanel"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Monster Performans hızlı panel"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
+        SizeToContent="WidthAndHeight" ShowActivated="True"
+        Deactivated="Window_Deactivated" KeyDown="Window_KeyDown">
+    <Border Width="320" Margin="12" Padding="16" CornerRadius="10"
+            Background="#F22B2B2B" BorderBrush="#444444" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.5" />
+        </Border.Effect>
+        <StackPanel>
+            <TextBlock Text="Monster Performans" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+            <UniformGrid Columns="2" Margin="0,12,0,0">
+                <StackPanel AutomationProperties.Name="İşlemci sıcaklığı">
+                    <TextBlock Text="CPU" Style="{StaticResource KartBasligi}" />
+                    <TextBlock x:Name="CpuC" Text="–" FontSize="26" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                </StackPanel>
+                <StackPanel AutomationProperties.Name="Ekran kartı sıcaklığı">
+                    <TextBlock Text="GPU" Style="{StaticResource KartBasligi}" />
+                    <TextBlock x:Name="GpuC" Text="–" FontSize="26" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                </StackPanel>
+            </UniformGrid>
+
+            <UniformGrid x:Name="HazirDugmeler" Rows="1" Margin="-3,14,-3,0" AutomationProperties.Name="Hazır profiller" />
+            <!-- Tepsi profili yoksa hiç yer kaplamaz (docs/04) -->
+            <ui:Button x:Name="KullaniciDugmesi" HorizontalAlignment="Stretch" Margin="0,6,0,0" Visibility="Collapsed" />
+
+            <TextBlock x:Name="Islem" Style="{StaticResource Ayrinti}" FontSize="12" TextWrapping="Wrap" Margin="0,10,0,0" />
+
+            <ui:Button Content="Monster Performans'ı aç" HorizontalAlignment="Stretch" Margin="0,12,0,0" Click="Ac_Click" />
+        </StackPanel>
+    </Border>
+</Window>

@@ -69,7 +69,8 @@ public sealed class FanKontrol(IDchu dchu, TimeSpan? dogrulamaAraligi = null)
         return true;
     }
 
-    internal static byte[] Komut14(FanEgrisi cpu, FanEgrisi gpu)
+    /// <summary>Komut 14 tamponu (fan sayfası baytları gösterir).</summary>
+    public static byte[] Komut14(FanEgrisi cpu, FanEgrisi gpu)
     {
         var b = new byte[256];
         Yerlestir(b, 0, cpu);

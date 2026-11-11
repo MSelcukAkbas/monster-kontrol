@@ -67,6 +67,22 @@ public sealed class ProfilUygulayici(IDchu dchu, IGucPlani plan, FanKontrol fan)
         return s;
     }
 
+    /// <summary>CLAUDE.md güvenli durumu: fan otomatik (mod 0 + 0x69), güç eğlence, Dengeli planın kendisi (kopya değil).</summary>
+    public IReadOnlyList<AdimSonucu> GuvenliDurum() =>
+    [
+        Dene("Fan", () => { fan.GuvenliDurum(); return AdimDurumu.Yazildi; }),
+        Dene("Güç seviyesi", () =>
+        {
+            dchu.Yaz(Komutlar.Secenek, (0x19u << 24) | (uint)GucSeviyesi.Eglence);
+            return AdimDurumu.Yazildi;
+        }),
+        Dene("Windows planı", () =>
+        {
+            plan.Etkinlestir(WindowsGucPlani.Dengeli);
+            return plan.Etkin == WindowsGucPlani.Dengeli ? AdimDurumu.Dogrulandi : throw new InvalidOperationException("Dengeli etkinleşmedi");
+        }),
+    ];
+
     /// <summary>%100 = sınırsız (0); aksi halde en yüksek turbonun yüzdesi, MHz.</summary>
     public static uint FrekansMhz(int yuzde) => yuzde >= 100 ? 0u : (uint)(yuzde * EnYuksekMhz / 100);
 
