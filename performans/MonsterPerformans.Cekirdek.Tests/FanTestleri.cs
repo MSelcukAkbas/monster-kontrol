@@ -8,7 +8,7 @@ public class FanTestleri
     static readonly FanEgrisi Cpu = new(53, 98, 80, 99), Gpu = new(61, 79, 80, 80);
 
     // Gerçek tampon 13 (11.11.2026, CC eğrisi yüklüyken); GPU 4. noktası 99°C
-    static byte[] T13() => Doldur(
+    internal static byte[] T13() => Doldur(
         [0, 0, 0, 0, 200, 0, 0, 200, 0, 0, 200, 0, 2, 0, 2, 6, 40, 89, 53, 250, 80, 252, 100, 255,
          40, 89, 61, 201, 80, 204, 99, 255, 0, 0, 100, 255, 100, 255, 0, 0, 0, 0, 0, 1]);
 
@@ -100,7 +100,7 @@ public class FanTestleri
     }
 
     /// <summary>Yansit: komut 14 yazılınca 2. ve 3. noktaları tampon 13'e koyar (EC gibi).</summary>
-    sealed class SahteDchu(byte[] t13) : IDchu
+    internal sealed class SahteDchu(byte[] t13) : IDchu
     {
         public bool Yansit, YazmaHatasi;
         public List<(int Komut, long Arguman)> Yazilanlar { get; } = [];
