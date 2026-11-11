@@ -8,6 +8,7 @@ using MonsterPerformans.Cekirdek;
 using MonsterPerformans.Cekirdek.Fan;
 using MonsterPerformans.Cekirdek.Guc;
 using MonsterPerformans.Cekirdek.Sensorler;
+using MonsterPerformans.Cekirdek.Uzaktan;
 
 namespace MonsterPerformans;
 
@@ -74,6 +75,7 @@ public partial class App : Application
     PdhSayaclari? _pdh;
     Nvml? _nvml;
     Tepsi? _tepsi;
+    KomutKanali? _kanal;
     readonly CancellationTokenSource _dur = new();
     Task? _ornekleme;
 
@@ -111,6 +113,12 @@ public partial class App : Application
             _ = YenidenUygula("Açılış");
             SystemEvents.PowerModeChanged += GucDegisti;
         }
+
+        _kanal = new KomutKanali(new Dictionary<string, Func<object>>
+        {
+            ["durum"] = Durum,
+            ["profiller"] = () => new { tamam = true, etkin = EtkinProfil, profiller = Ayarlar.Hepsi.Select(p => new { ad = p.Ad, guc = p.Guc.ToString(), fan = p.Fan.ToString(), hazir = HazirProfiller.Kilitli(p) }) },
+        }, f => Dispatcher.Invoke(f));
 
         WindowsIleBaslat.YoluTazele();
         MainWindow = new MainWindow();
@@ -282,6 +290,29 @@ public partial class App : Application
         return (s, kiyas);
     }
 
+    /// <summary>Kanal "durum": son örnek ve uygulama durumu (arayüz iş parçacığında).</summary>
+    static object Durum()
+    {
+        var o = Gecmis.Son(1).FirstOrDefault();
+        var d = o?.Dchu;
+        return new
+        {
+            tamam = true,
+            donanim = DonanimVar,
+            hata = DonanimHatasi,
+            zaman = o?.Zaman,
+            cpu = d is { Gecerli: true } ? new { c = d.Value.CpuC, duty = d.Value.CpuDuty, rpm = d.Value.CpuRpm } : null,
+            gpu = d is null ? null : new { c = o!.Gpu?.C, duty = d.Value.GpuDuty, rpm = d.Value.GpuRpm, watt = o.Gpu?.Watt, kullanim = o.Gpu?.Kullanim },
+            mhz = o?.GercekMHz,
+            plan = PlanAdi,
+            profil = EtkinProfil,
+            fan = _temel?.Fan.ToString(),
+            acil = _uygulananKademe.ToString(),
+            mesgul = Mesgul,
+            sonIslem = SonIslem,
+        };
+    }
+
     void GucDegisti(object? sender, PowerModeChangedEventArgs e)
     {
         if (e.Mode == PowerModes.Resume) Dispatcher.BeginInvoke(() => YenidenUygula("Uykudan dönüş"));
@@ -383,6 +414,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         SystemEvents.PowerModeChanged -= GucDegisti;
+        _kanal?.Dispose();
         _dur.Cancel();
         _ornekleme?.Wait(TimeSpan.FromSeconds(2));
         _csv?.Dispose();
