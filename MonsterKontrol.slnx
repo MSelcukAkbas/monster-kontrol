@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/klavye/">
     <Project Path="klavye/MonsterKlavye.Duman/MonsterKlavye.Duman.csproj" />
+    <Project Path="klavye/MonsterKlavye.Mcp/MonsterKlavye.Mcp.csproj" />
     <Project Path="klavye/MonsterKlavye.Tests/MonsterKlavye.Tests.csproj">
       <Platform Project="x64" />
     </Project>

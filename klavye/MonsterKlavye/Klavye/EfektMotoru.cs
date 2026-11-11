@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace MonsterKlavye.Klavye;
 
@@ -22,6 +22,11 @@ public sealed class EfektMotoru : IDisposable
     Efekt _efekt = Efektler.Sabit;
     EfektAyarlari _ayarlar = new(5, Efektler.TamCark);
     double _faz;
+    bool _duraklatildi;
+    Rgb? _sonKare; // son gönderilen efekt rengi; null = sıradaki kare koşulsuz gider
+    double _sonKareYasi;
+    Rgb _uyariRengi;
+    double _uyariKalan, _uyariFaz; // saniye; kalan > 0 iken uyarı flaşı her şeyin önüne geçer
     double _sicaklik = 50, _sicaklikYasi = double.MaxValue; // yalnız döngü iş parçacığı kullanır
 
     /// <param name="gonder">Durumu klavyeye iletir (hızlı dönmeli; kilit içinde çağrılır).</param>
@@ -58,16 +63,41 @@ public sealed class EfektMotoru : IDisposable
         Uygula();
     }
 
-    bool Calisiyor => _temel.Acik && !ReferenceEquals(_efekt, Efektler.Sabit); // kilit içinde çağrılır
+    /// <summary>Uyku / kilit: efekt durur, klavyede temel (sabit) renk kalır; kalkınca efekt kaldığı yerden sürer.</summary>
+    public bool Duraklatildi
+    {
+        get { lock (_kilit) return _duraklatildi; }
+        set { lock (_kilit) _duraklatildi = value; Gonder(); } // kullanıcı ayarı değil: Degisti yok
+    }
+
+    /// <summary>
+    /// Anlık uyarı: tam parlaklıkta <paramref name="kez"/> kez yanıp söner (0,25 sn yanık / 0,25 sn sönük), sonra önceki
+    /// duruma döner. Işık kapalıyken ya da kilitliyken de yanar. Kullanıcı ayarı değildir: kaydedilmez, Degisti yok.
+    /// </summary>
+    public void Uyar(Rgb renk, int kez)
+    {
+        lock (_kilit) (_uyariRengi, _uyariKalan, _uyariFaz) = (renk, kez * UyariPeriyodu, 0);
+        Gonder();
+    }
+
+    const double UyariPeriyodu = 0.5;
+
+    bool Calisiyor => _uyariKalan > 0 || (!_duraklatildi && _temel.Acik && !ReferenceEquals(_efekt, Efektler.Sabit)); // kilit içinde çağrılır
 
     void Uygula()
     {
+        Gonder();
+        Degisti?.Invoke();
+    }
+
+    void Gonder()
+    {
         lock (_kilit)
         {
+            _sonKare = null;
             if (Calisiyor) _uyan.Release();
             else _gonder(_temel);
         }
-        Degisti?.Invoke();
     }
 
     /// <summary>Bir kare ilerlet ve gönder (dt saniye).</summary>
@@ -83,13 +113,38 @@ public sealed class EfektMotoru : IDisposable
         lock (_kilit)
         {
             if (!Calisiyor) return;
+            if (_uyariKalan > 0)
+            {
+                _uyariKalan -= dt;
+                _uyariFaz += dt;
+                if (_uyariKalan > 0)
+                {
+                    var yanik = _uyariFaz % UyariPeriyodu < UyariPeriyodu / 2;
+                    _gonder(_temel with { Renk = yanik ? _uyariRengi : new(0, 0, 0), ParlaklikYuzde = 100, Acik = true });
+                    return;
+                }
+                _sonKare = null; // uyarı bitti: önceki durum / efekt koşulsuz geri yazılır
+                if (!Calisiyor) { _gonder(_temel); return; }
+            }
             _faz += dt * _ayarlar.Carpan;
             var kare = _efekt.Hesapla(new(_faz, _temel.Renk, _ayarlar.Skala, _sicaklik));
             // Efekt parlaklığı renge katılır, donanım parlaklığı kullanıcınınkinde kalır: karede en çok 1 DLL yazması.
             // Ayrı parlaklık komutu yazma sayısını ikiye katlayıp CPU'yu %1'in üstüne çıkarıyordu (Ateş: %1,4).
-            _gonder(_temel with { Renk = kare.Renk.Olcekle(kare.Parlaklik) });
+            var renk = kare.Renk.Olcekle(kare.Parlaklik);
+            _sonKareYasi += dt;
+            // Her yazma ~2,7 ms çekirdek CPU'su (sürücü): gözün seçemeyeceği küçük adımlar atlanır,
+            // ama fark 0,5 sn'den uzun beklemez (nefesin tepesi / dibi yanlış renkte takılı kalmasın).
+            if (_sonKare is { } son && (son == renk || (!Gorunur(son, renk) && _sonKareYasi < 0.5))) return;
+            (_sonKare, _sonKareYasi) = (renk, 0);
+            _gonder(_temel with { Renk = renk });
         }
     }
+
+    /// <summary>Kanallardan biri %4'ten çok değiştiyse (göz parlaklığı oransal algılar: koyu tonda 1 adım bile görünür).</summary>
+    internal static bool Gorunur(Rgb a, Rgb b) =>
+        Oran(a.R, b.R) >= 0.04 || Oran(a.G, b.G) >= 0.04 || Oran(a.B, b.B) >= 0.04;
+
+    static double Oran(byte x, byte y) => Math.Abs(x - y) / (double)Math.Max(Math.Max(x, y), (byte)1);
 
     async Task Dongu()
     {

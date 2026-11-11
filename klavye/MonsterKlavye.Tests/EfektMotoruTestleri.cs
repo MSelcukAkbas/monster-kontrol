@@ -1,4 +1,4 @@
-using MonsterKlavye.Klavye;
+﻿using MonsterKlavye.Klavye;
 
 namespace MonsterKlavye.Tests;
 
@@ -33,6 +33,22 @@ public class EfektMotoruTestleri
     }
 
     [Fact]
+    public void Duraklatinca_sabit_renk_kalir_kalkinca_efekt_kaldigi_yerden_surer()
+    {
+        using var m = Yeni();
+        m.EfektAyarla(Bul("nefes"));
+        m.Adim(1);                       // faz 1
+        _giden.Clear();
+        m.Duraklatildi = true;           // uyku / kilit
+        m.Adim(1);                       // duraklatılmışken kare gitmez
+        Assert.Equal([Temel], _giden);   // yalnız sabit temel renk
+        m.Duraklatildi = false;
+        m.Adim(1);                       // faz 2: tam parlak (duraklatma fazı ilerletmedi)
+        Assert.Equal([Temel, Temel], _giden);
+        Assert.Same(Bul("nefes"), m.Efekt);
+    }
+
+    [Fact]
     public void Efekt_karesi_klavyeye_en_cok_bir_komut_yazar()
     {
         // Ateş hem rengi hem parlaklığı her karede değiştirir; yine de tek DLL yazması gitmeli (CPU < %1)
@@ -44,6 +60,46 @@ public class EfektMotoruTestleri
         }, () => 50, donguyuBaslat: false);
         m.EfektAyarla(Bul("ates"));
         for (var i = 0; i < 100; i++) m.Adim(0.067);
+    }
+
+    [Fact]
+    public void Yavas_nefeste_gorunmez_adimlar_atlanir_fark_yarim_saniyeden_uzun_kalmaz()
+    {
+        using var m = Yeni();
+        m.EfektAyarla(Bul("nefes"), new EfektAyarlari(2, Efektler.TamCark));
+        _giden.Clear();
+        var sonGidis = 0.0;
+        for (var i = 1; i <= 15 * 60; i++)
+        {
+            var once = _giden.Count;
+            m.Adim(1.0 / 15);
+            if (_giden.Count > once) sonGidis = i / 15.0;
+            Assert.True(i / 15.0 - sonGidis <= 0.55 || _giden[^1].Renk == Temel.Renk.Olcekle(Efektler.Dalga(i / 15.0 * 0.4, 4)));
+        }
+        Assert.InRange(_giden.Count / 60.0, 5, 11); // eskiden saniyede ~14 yazma
+    }
+
+    [Fact]
+    public void Uyari_isik_kapaliyken_de_tam_parlak_yanip_soner_sonra_onceki_duruma_doner()
+    {
+        var kapali = Temel with { Acik = false };
+        using var m = new EfektMotoru(kapali, _giden.Add, () => 50, donguyuBaslat: false);
+        _giden.Clear();
+        var kirmizi = new Rgb(255, 0, 0);
+        m.Uyar(kirmizi, 2);
+        for (var i = 0; i < 12; i++) m.Adim(0.125); // 1 sn uyarı + fazlası (ikili kesirde tam: kayan nokta kayması yok)
+        var yanik = kapali with { Renk = kirmizi, ParlaklikYuzde = 100, Acik = true };
+        var sonuk = yanik with { Renk = new(0, 0, 0) };
+        Assert.Equal([yanik, sonuk, sonuk, yanik, yanik, sonuk, sonuk, kapali], _giden);
+        Assert.Equal(kapali, m.Temel); // ayar değişmedi
+    }
+
+    [Fact]
+    public void Gorunurluk_koyu_tonda_kucuk_adimi_parlak_tonda_buyuk_adimi_ister()
+    {
+        Assert.True(EfektMotoru.Gorunur(new(10, 0, 0), new(11, 0, 0)));   // %9
+        Assert.False(EfektMotoru.Gorunur(new(250, 0, 0), new(245, 0, 0))); // %2
+        Assert.True(EfektMotoru.Gorunur(new(0, 0, 0), new(1, 0, 0)));
     }
 
     [Fact]

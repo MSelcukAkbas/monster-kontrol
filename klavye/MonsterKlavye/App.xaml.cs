@@ -1,8 +1,10 @@
-using System.IO;
+﻿using System.IO;
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
+using Microsoft.Win32;
 using MonsterKlavye.Klavye;
+using MonsterKlavye.Uzaktan;
 using MonsterKontrol.Dchu;
 
 namespace MonsterKlavye;
@@ -29,6 +31,7 @@ public partial class App : Application
 
     DchuCihazi? _dchu;
     Tepsi? _tepsi;
+    KomutKanali? _kanal;
     static readonly DispatcherTimer _kayitZamanlayici = new() { Interval = TimeSpan.FromMilliseconds(500) };
 
     protected override void OnStartup(StartupEventArgs e)
@@ -66,13 +69,41 @@ public partial class App : Application
         _kayitZamanlayici.Tick += (_, _) => Kaydet();
 
         WindowsIleBaslat.YoluTazele();
-        // Oturum açılışında BIOS / CC kendi kaydını (mavi) geç yazabiliyor: birkaç saniye sonra bir kez daha yaz.
-        _ = Task.Delay(TimeSpan.FromSeconds(4)).ContinueWith(_ => Kontrol?.YenidenUygula());
+        GecikmeliYenidenUygula();
+        SystemEvents.PowerModeChanged += GucDegisti;
+        SystemEvents.SessionSwitch += OturumDegisti;
+        _kanal = new KomutKanali(Dispatcher);
 
         MainWindow = new MainWindow();
         _tepsi = new Tepsi();
         if (!e.Args.Contains(WindowsIleBaslat.TepsiArgumani)) MainWindow.Show();
         base.OnStartup(e);
+    }
+
+    /// <summary>Oturum açılışında / uyanınca BIOS veya CC kendi kaydını (mavi) geç yazabiliyor: birkaç saniye sonra bir kez daha yaz.</summary>
+    static void GecikmeliYenidenUygula() =>
+        _ = Task.Delay(TimeSpan.FromSeconds(4)).ContinueWith(_ => Kontrol?.YenidenUygula());
+
+    // SystemEvents kendi iş parçacığında çağırabilir: motor Degisti'yi UI'da bekler, işi UI iş parçacığına taşı.
+    void GucDegisti(object sender, PowerModeChangedEventArgs e) => Dispatcher.BeginInvoke(() =>
+    {
+        if (e.Mode == PowerModes.Suspend) Duraklat(true);
+        else if (e.Mode == PowerModes.Resume) Duraklat(false);
+    });
+
+    void OturumDegisti(object sender, SessionSwitchEventArgs e) => Dispatcher.BeginInvoke(() =>
+    {
+        if (e.Reason == SessionSwitchReason.SessionLock) Duraklat(true);
+        else if (e.Reason == SessionSwitchReason.SessionUnlock) Duraklat(false);
+    });
+
+    /// <summary>Uyku / kilitte efekt durur (sabit renk kalır); dönüşte sürer ve her şey yeniden yazılır.</summary>
+    static void Duraklat(bool dur)
+    {
+        Motor.Duraklatildi = dur;
+        if (dur) return;
+        Kontrol?.YenidenUygula();
+        GecikmeliYenidenUygula();
     }
 
     public static void PencereyiGoster()
@@ -114,6 +145,9 @@ public partial class App : Application
     {
         if (Motor is not null) // ikinci örnek hiçbir şey başlatmadı; ayar dosyasının üzerine varsayılan yazmasın
         {
+            _kanal?.Dispose(); // önce kanal: kapanırken dışarıdan komut gelmesin
+            SystemEvents.PowerModeChanged -= GucDegisti; // statik olaylar: bırakılmazsa sızar (belgelenmiş)
+            SystemEvents.SessionSwitch -= OturumDegisti;
             Kaydet();
             Motor.Dispose(); // önce motor: kapanırken Kontrol'e kare göndermesin
             // Güvenli kapanış: efektin son karesi (ör. nefesin karanlık anı) klavyede kalmasın, sabit renk yazılır.
