@@ -1,0 +1,80 @@
+<UserControl x:Class="MonsterPerformans.Sayfalar.PanoSayfasi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:s="clr-namespace:MonsterPerformans.Sayfalar">
+    <Grid Margin="28,20,28,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Profiller: bir sonraki aşamada etkinleşir (şimdilik donanıma yazılmaz) -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+            <TextBlock Text="Pano" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,24,0" />
+            <ui:Button Content="Sessiz" Margin="0,0,8,0" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Profiller sonraki aşamada" />
+            <ui:Button Content="Dengeli" Margin="0,0,8,0" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Profiller sonraki aşamada" />
+            <ui:Button Content="Performans" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Profiller sonraki aşamada" />
+        </StackPanel>
+
+        <UniformGrid Grid.Row="1" Columns="4" Margin="-6,0">
+            <Border Style="{StaticResource Kart}" Margin="6" AutomationProperties.Name="İşlemci">
+                <StackPanel>
+                    <TextBlock Text="CPU" Style="{StaticResource KartBasligi}" />
+                    <TextBlock x:Name="CpuC" Text="–" Style="{StaticResource BuyukSayi}" />
+                    <TextBlock x:Name="CpuAyrinti" Text=" " Style="{StaticResource Ayrinti}" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Kart}" Margin="6" AutomationProperties.Name="Ekran kartı">
+                <StackPanel>
+                    <TextBlock Text="GPU" Style="{StaticResource KartBasligi}" />
+                    <TextBlock x:Name="GpuC" Text="–" Style="{StaticResource BuyukSayi}" />
+                    <TextBlock x:Name="GpuAyrinti" Text=" " Style="{StaticResource Ayrinti}" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Kart}" Margin="6" AutomationProperties.Name="İşlemci fanı">
+                <StackPanel>
+                    <TextBlock Text="CPU fanı" Style="{StaticResource KartBasligi}" />
+                    <TextBlock x:Name="CpuFan" Text="–" Style="{StaticResource BuyukSayi}" />
+                    <TextBlock x:Name="CpuFanAyrinti" Text=" " Style="{StaticResource Ayrinti}" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Kart}" Margin="6" AutomationProperties.Name="Ekran kartı fanı">
+                <StackPanel>
+                    <TextBlock Text="GPU fanı" Style="{StaticResource KartBasligi}" />
+                    <TextBlock x:Name="GpuFan" Text="–" Style="{StaticResource BuyukSayi}" />
+                    <TextBlock x:Name="GpuFanAyrinti" Text=" " Style="{StaticResource Ayrinti}" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <Border Grid.Row="2" Style="{StaticResource Kart}" Margin="0,12,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <DockPanel Margin="0,0,0,12">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" AutomationProperties.Name="Grafik süresi">
+                        <ui:Button x:Name="Dk1" Content="1 dk" Tag="60" Click="Pencere_Click" Margin="0,0,6,0" Appearance="Primary" />
+                        <ui:Button x:Name="Dk5" Content="5 dk" Tag="300" Click="Pencere_Click" Margin="0,0,6,0" />
+                        <ui:Button x:Name="Dk30" Content="30 dk" Tag="1800" Click="Pencere_Click" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Rectangle Width="14" Height="3" Fill="{DynamicResource AccentFillColorDefaultBrush}" Margin="0,0,6,0" />
+                        <TextBlock Text="CPU °C" Style="{StaticResource Ayrinti}" Margin="0,0,16,0" />
+                        <Rectangle Width="14" Height="3" Fill="{x:Static s:Grafik.GpuRengi}" Margin="0,0,6,0" />
+                        <TextBlock Text="GPU °C" Style="{StaticResource Ayrinti}" Margin="0,0,16,0" />
+                        <Rectangle Width="14" Height="2" Fill="{x:Static s:Grafik.FanRengi}" Margin="0,0,6,0" />
+                        <TextBlock Text="CPU fanı %" Style="{StaticResource Ayrinti}" />
+                    </StackPanel>
+                </DockPanel>
+                <s:Grafik x:Name="Cizim" Grid.Row="1" AutomationProperties.Name="Sıcaklık ve fan grafiği" />
+            </Grid>
+        </Border>
+
+        <TextBlock x:Name="Durum" Grid.Row="3" Margin="2,12,0,0" Style="{StaticResource Ayrinti}" Text="Ölçüm bekleniyor…" />
+    </Grid>
+</UserControl>

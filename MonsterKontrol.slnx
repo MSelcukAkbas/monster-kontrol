@@ -16,5 +16,8 @@
     <Project Path="performans/MonsterPerformans.Cekirdek.Tests/MonsterPerformans.Cekirdek.Tests.csproj" />
     <Project Path="performans/MonsterPerformans.Cekirdek/MonsterPerformans.Cekirdek.csproj" />
     <Project Path="performans/MonsterPerformans.Golge/MonsterPerformans.Golge.csproj" />
+    <Project Path="performans/MonsterPerformans/MonsterPerformans.csproj">
+      <Platform Project="x64" />
+    </Project>
   </Folder>
 </Solution>
