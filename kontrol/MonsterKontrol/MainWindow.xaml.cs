@@ -64,4 +64,20 @@ public partial class MainWindow : FluentWindow, MonsterPerformans.IGezgin
             if (diger is not null && !ReferenceEquals(diger, liste)) diger.SelectedItem = null;
         if (Icerik is not null && _sayfalar.TryGetValue((string)secili.Tag, out var s)) Icerik.Content = s; // Icerik null: InitializeComponent sırasında
     }
+
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        if (App.TepsiVar && !App.Cikiliyor)
+        {
+            e.Cancel = true; // efektler ve fan denetimi tepside sürer; çıkış tepsi menüsünden
+            Hide();
+        }
+        base.OnClosing(e);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        Application.Current.Shutdown(); // tepsi yoksa (iki bölüm de kapalı) kapatmak çıkıştır
+    }
 }

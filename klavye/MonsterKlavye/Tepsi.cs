@@ -12,7 +12,7 @@ namespace MonsterKlavye;
 /// Tepsi simgesi (WinForms NotifyIcon: pencere olmadan da çalışır). Simge o anki klavye renginde.
 /// Sol tık: hızlı panel. Sağ tık: WPF menüsü (Fluent görünümlü).
 /// </summary>
-sealed class Tepsi : IDisposable
+public sealed class Tepsi : IDisposable
 {
     readonly Forms.NotifyIcon _simge = new() { Visible = true };
     readonly HizliPanel _panel = new();

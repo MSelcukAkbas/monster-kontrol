@@ -3,7 +3,7 @@ using Microsoft.Win32;
 namespace MonsterKlavye;
 
 /// <summary>HKCU\...\Run kaydı (yönetici gerekmez). Açılışta pencere gösterilmez, yalnız tepsi.</summary>
-static class WindowsIleBaslat
+public static class WindowsIleBaslat
 {
     const string Anahtar = @"Software\Microsoft\Windows\CurrentVersion\Run", Ad = "MonsterKlavye";
     public const string TepsiArgumani = "--tepsi";

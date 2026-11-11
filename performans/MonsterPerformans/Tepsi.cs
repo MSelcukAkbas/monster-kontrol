@@ -13,7 +13,7 @@ namespace MonsterPerformans;
 /// Tepsi simgesi: CPU sıcaklığı rakamla, renk sıcaklık bandına göre. Simge yalnız sayı değişince yeniden çizilir.
 /// Sol tık: hızlı panel. Sağ tık: Aç / Çıkış. (Yapı Monster Klavye'deki Tepsi ile aynı.)
 /// </summary>
-sealed class Tepsi : IDisposable
+public sealed class Tepsi : IDisposable
 {
     readonly Forms.NotifyIcon _simge = new() { Visible = true, Text = "Monster Performans" };
     readonly HizliPanel _panel = new();
