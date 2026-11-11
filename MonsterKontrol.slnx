@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/kontrol/">
+    <Project Path="kontrol/MonsterKontrol/MonsterKontrol.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
   <Folder Name="/klavye/">
     <Project Path="klavye/MonsterKlavye.Duman/MonsterKlavye.Duman.csproj" />
     <Project Path="klavye/MonsterKlavye.Mcp/MonsterKlavye.Mcp.csproj" />

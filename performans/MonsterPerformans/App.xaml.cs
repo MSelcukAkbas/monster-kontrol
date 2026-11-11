@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using MonsterKontrol.Dchu;
 using MonsterPerformans.Cekirdek;
@@ -67,30 +68,47 @@ public partial class App : Application
 
     const int KayitGun = 30;
     static volatile string? _kayitKlasoru; // null: kayıt kapalı. Örnekleyici iş parçacığı okur
-    CsvKayitci? _csv; // yalnız örnekleyici iş parçacığında
-    string? _csvKlasoru;
-    DateOnly _temizlik;
+    static CsvKayitci? _csv; // yalnız örnekleyici iş parçacığında
+    static string? _csvKlasoru;
+    static DateOnly _temizlik;
 
-    DchuCihazi? _dchu;
-    PdhSayaclari? _pdh;
-    Nvml? _nvml;
+    static DchuCihazi? _dchu;
+    static PdhSayaclari? _pdh;
+    static Nvml? _nvml;
+    static KomutKanali? _kanal;
+    static readonly CancellationTokenSource _dur = new();
+    static Task? _ornekleme;
+    static Dispatcher _arayuz = null!;
     Tepsi? _tepsi;
-    KomutKanali? _kanal;
-    readonly CancellationTokenSource _dur = new();
-    Task? _ornekleme;
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        if (!Baslat(Dispatcher))
+        {
+            Shutdown();
+            return;
+        }
+        MainWindow = new MainWindow();
+        _tepsi = new Tepsi();
+        if (!e.Args.Contains(WindowsIleBaslat.TepsiArgumani)) MainWindow.Show();
+        base.OnStartup(e);
+    }
+
+    /// <summary>
+    /// Pencere ve tepsi dışında her şeyi başlatır (Monster Kontrol de bunu çağırır). Başka örnek açıksa ona "göster" der, false döner.
+    /// </summary>
+    public static bool Baslat(Dispatcher arayuz)
+    {
+        _arayuz = arayuz;
         _tekOrnek = new Mutex(true, Ad, out var ilk);
         _gosterIstegi = new EventWaitHandle(false, EventResetMode.AutoReset, Ad + ".Goster");
         if (!ilk)
         {
             AllowSetForegroundWindow(-1); // ASFW_ANY: ilk örnek penceresini öne alabilsin
             _gosterIstegi.Set();
-            Shutdown();
-            return;
+            return false;
         }
-        ThreadPool.RegisterWaitForSingleObject(_gosterIstegi, (_, _) => Dispatcher.BeginInvoke(PencereyiGoster), null, -1, false);
+        ThreadPool.RegisterWaitForSingleObject(_gosterIstegi, (_, _) => arayuz.BeginInvoke(PencereyiGoster), null, -1, false);
 
         try
         {
@@ -118,17 +136,14 @@ public partial class App : Application
         {
             ["durum"] = Durum,
             ["profiller"] = () => new { tamam = true, etkin = EtkinProfil, profiller = Ayarlar.Hepsi.Select(p => new { ad = p.Ad, guc = p.Guc.ToString(), fan = p.Fan.ToString(), hazir = HazirProfiller.Kilitli(p) }) },
-        }, f => Dispatcher.Invoke(f));
+        }, f => arayuz.Invoke(f));
 
         WindowsIleBaslat.YoluTazele();
-        MainWindow = new MainWindow();
-        _tepsi = new Tepsi();
-        if (!e.Args.Contains(WindowsIleBaslat.TepsiArgumani)) MainWindow.Show();
-        base.OnStartup(e);
+        return true;
     }
 
     /// <summary>1 Hz; DCHU ve PDH okumaları bloklar, arayüz iş parçacığında yapılmaz.</summary>
-    async Task Ornekle(Ornekleyici ornekleyici, CancellationToken dur)
+    static async Task Ornekle(Ornekleyici ornekleyici, CancellationToken dur)
     {
         var plan = new WindowsGucPlani();
         using var saat = new PeriodicTimer(TimeSpan.FromSeconds(1));
@@ -140,7 +155,7 @@ public partial class App : Application
                 {
                     var o = ornekleyici.Oku();
                     var ad = WindowsGucPlani.Ad(plan.Etkin);
-                    _ = Dispatcher.BeginInvoke(() =>
+                    _ = _arayuz.BeginInvoke(() =>
                     {
                         Gecmis.Ekle(o);
                         PlanAdi = ad;
@@ -313,13 +328,13 @@ public partial class App : Application
         };
     }
 
-    void GucDegisti(object? sender, PowerModeChangedEventArgs e)
+    static void GucDegisti(object? sender, PowerModeChangedEventArgs e)
     {
-        if (e.Mode == PowerModes.Resume) Dispatcher.BeginInvoke(() => YenidenUygula("Uykudan dönüş"));
+        if (e.Mode == PowerModes.Resume) _arayuz.BeginInvoke(() => YenidenUygula("Uykudan dönüş"));
     }
 
     /// <summary>Örnekleyici iş parçacığında: günlük CSV (ham tampon dahil); 30 günden eskiler dakikalık özete iner.</summary>
-    void Kaydet(Olcum o)
+    static void Kaydet(Olcum o)
     {
         var klasor = _kayitKlasoru;
         if (klasor != _csvKlasoru)
@@ -413,6 +428,14 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        Durdur();
+        _tepsi?.Dispose();
+        base.OnExit(e);
+    }
+
+    /// <summary>Güvenli kapanış: örnekleme durur, fan bu oturumda değiştiyse otomatiğe döner.</summary>
+    public static void Durdur()
+    {
         SystemEvents.PowerModeChanged -= GucDegisti;
         _kanal?.Dispose();
         _dur.Cancel();
@@ -423,12 +446,10 @@ public partial class App : Application
             try { _uygulayici?.FanOtomatigeDon(AcilDurum.Uyarla(_temel ?? HazirProfiller.Dengeli, _uygulananKademe).Guc); }
             catch (Exception ex) { Debug.WriteLine($"Çıkışta fan güvenli duruma dönmedi: {ex.Message}"); }
         }
-        _tepsi?.Dispose();
         _nvml?.Dispose();
         _pdh?.Dispose();
         _dchu?.Dispose();
         _tekOrnek?.Dispose();
-        base.OnExit(e);
     }
 
     [DllImport("user32.dll")]

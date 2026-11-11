@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
@@ -29,13 +29,31 @@ public partial class App : Application
     static Mutex? _tekOrnek; // alan olarak tutulur: yerel değişken olsa çöp toplayıcı bırakır, koruma sessizce kalkar
     static EventWaitHandle? _gosterIstegi;
 
-    DchuCihazi? _dchu;
+    static DchuCihazi? _dchu;
+    static KomutKanali? _kanal;
+    static Dispatcher _arayuz = null!;
     Tepsi? _tepsi;
-    KomutKanali? _kanal;
     static readonly DispatcherTimer _kayitZamanlayici = new() { Interval = TimeSpan.FromMilliseconds(500) };
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        if (!Baslat(Dispatcher))
+        {
+            Shutdown();
+            return;
+        }
+        MainWindow = new MainWindow();
+        _tepsi = new Tepsi();
+        if (!e.Args.Contains(WindowsIleBaslat.TepsiArgumani)) MainWindow.Show();
+        base.OnStartup(e);
+    }
+
+    /// <summary>
+    /// Pencere ve tepsi dışında her şeyi başlatır (Monster Kontrol de bunu çağırır). Başka örnek açıksa ona "göster" der, false döner.
+    /// </summary>
+    public static bool Baslat(Dispatcher arayuz)
+    {
+        _arayuz = arayuz;
         // Tek örnek: DLL'e ve klavyeye dokunmadan ÖNCE. İkinci açılış ilkine "göster" der ve çıkar.
         _tekOrnek = new Mutex(true, Ad, out var ilk);
         _gosterIstegi = new EventWaitHandle(false, EventResetMode.AutoReset, Ad + ".Goster");
@@ -43,10 +61,9 @@ public partial class App : Application
         {
             AllowSetForegroundWindow(-1); // ASFW_ANY: ilk örnek penceresini öne alabilsin
             _gosterIstegi.Set();
-            Shutdown();
-            return;
+            return false;
         }
-        ThreadPool.RegisterWaitForSingleObject(_gosterIstegi, (_, _) => Dispatcher.BeginInvoke(PencereyiGoster), null, -1, false);
+        ThreadPool.RegisterWaitForSingleObject(_gosterIstegi, (_, _) => arayuz.BeginInvoke(PencereyiGoster), null, -1, false);
 
         try
         {
@@ -72,12 +89,8 @@ public partial class App : Application
         GecikmeliYenidenUygula();
         SystemEvents.PowerModeChanged += GucDegisti;
         SystemEvents.SessionSwitch += OturumDegisti;
-        _kanal = new KomutKanali(Dispatcher);
-
-        MainWindow = new MainWindow();
-        _tepsi = new Tepsi();
-        if (!e.Args.Contains(WindowsIleBaslat.TepsiArgumani)) MainWindow.Show();
-        base.OnStartup(e);
+        _kanal = new KomutKanali(arayuz);
+        return true;
     }
 
     /// <summary>Oturum açılışında / uyanınca BIOS veya CC kendi kaydını (mavi) geç yazabiliyor: birkaç saniye sonra bir kez daha yaz.</summary>
@@ -85,13 +98,13 @@ public partial class App : Application
         _ = Task.Delay(TimeSpan.FromSeconds(4)).ContinueWith(_ => Kontrol?.YenidenUygula());
 
     // SystemEvents kendi iş parçacığında çağırabilir: motor Degisti'yi UI'da bekler, işi UI iş parçacığına taşı.
-    void GucDegisti(object sender, PowerModeChangedEventArgs e) => Dispatcher.BeginInvoke(() =>
+    static void GucDegisti(object sender, PowerModeChangedEventArgs e) => _arayuz.BeginInvoke(() =>
     {
         if (e.Mode == PowerModes.Suspend) Duraklat(true);
         else if (e.Mode == PowerModes.Resume) Duraklat(false);
     });
 
-    void OturumDegisti(object sender, SessionSwitchEventArgs e) => Dispatcher.BeginInvoke(() =>
+    static void OturumDegisti(object sender, SessionSwitchEventArgs e) => _arayuz.BeginInvoke(() =>
     {
         if (e.Reason == SessionSwitchReason.SessionLock) Duraklat(true);
         else if (e.Reason == SessionSwitchReason.SessionUnlock) Duraklat(false);
@@ -143,6 +156,14 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        Durdur();
+        _tepsi?.Dispose();
+        base.OnExit(e);
+    }
+
+    /// <summary>Güvenli kapanış: kanal, kayıt, son sabit renk, DLL.</summary>
+    public static void Durdur()
+    {
         if (Motor is not null) // ikinci örnek hiçbir şey başlatmadı; ayar dosyasının üzerine varsayılan yazmasın
         {
             _kanal?.Dispose(); // önce kanal: kapanırken dışarıdan komut gelmesin
@@ -154,11 +175,9 @@ public partial class App : Application
             Kontrol?.Ayarla(Motor.Temel);
             Kontrol?.BirTurGonder();
         }
-        _tepsi?.Dispose();
         Kontrol?.Dispose();
         _dchu?.Dispose();
         _tekOrnek?.Dispose();
-        base.OnExit(e);
     }
 
     [DllImport("user32.dll")]

@@ -233,6 +233,6 @@ public partial class ProfillerSayfasi : UserControl
 
     void Egri_Click(object sender, RoutedEventArgs e)
     {
-        if (Secili is { } p && Window.GetWindow(this) is MainWindow w) w.Git("fan", p.Ad);
+        if (Secili is { } p && Window.GetWindow(this) is IGezgin w) w.Git("fan", p.Ad);
     }
 }
