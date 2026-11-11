@@ -1,0 +1,160 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+            <!-- Yan menü öğesi: hafif zemin + solda vurgu çizgisi (tasarımdaki gibi) -->
+            <Style x:Key="MenuOgesi" TargetType="ListBoxItem">
+                <Setter Property="Height" Value="40" />
+                <Setter Property="Margin" Value="0,2" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <Border x:Name="Zemin" CornerRadius="6" Background="Transparent" Padding="12,0">
+                                <Grid>
+                                    <Border x:Name="Cizgi" Width="3" Height="16" CornerRadius="2" HorizontalAlignment="Left"
+                                            Margin="-12,0,0,0" Background="{DynamicResource AccentFillColorDefaultBrush}" Visibility="Collapsed" />
+                                    <ContentPresenter VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Zemin" Property="Background" Value="#0FFFFFFF" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Zemin" Property="Background" Value="#14FFFFFF" />
+                                    <Setter TargetName="Cizgi" Property="Visibility" Value="Visible" />
+                                    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Zemin" Property="BorderBrush" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                    <Setter TargetName="Zemin" Property="BorderThickness" Value="1" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Kart: tasarımdaki yuvarlak köşeli koyu yüzey -->
+            <Style x:Key="Kart" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="Padding" Value="20,18" />
+            </Style>
+
+            <!-- Yuvarlak hazır renk düğmesi: seçiliyse dışında halka -->
+            <Style x:Key="RenkDugmesi" TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="Margin" Value="0,0,10,0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Ellipse x:Name="Halka" Stroke="{TemplateBinding Background}" StrokeThickness="2" Opacity="0" Margin="-5" />
+                                <Ellipse Fill="{TemplateBinding Background}" Stroke="#40000000" StrokeThickness="1" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Tag" Value="secili">
+                                    <Setter TargetName="Halka" Property="Opacity" Value="1" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value><ScaleTransform ScaleX="1.08" ScaleY="1.08" /></Setter.Value>
+                                    </Setter>
+                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Halka" Property="Opacity" Value="0.6" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Tepsi sağ tık menüsü (tasarım: Tepsi). Alt menüler de aynı yüzeyi kullanır. -->
+            <Style x:Key="TepsiYuzeyi" TargetType="Border">
+                <Setter Property="Background" Value="#F22B2B2B" />
+                <Setter Property="BorderBrush" Value="#444444" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="4" />
+                <Setter Property="Margin" Value="0,0,10,10" />
+                <Setter Property="Effect">
+                    <Setter.Value><DropShadowEffect BlurRadius="16" ShadowDepth="4" Opacity="0.5" /></Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="TepsiMenusu" TargetType="ContextMenu">
+                <Setter Property="Width" Value="240" />
+                <Setter Property="HasDropShadow" Value="False" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ContextMenu">
+                            <Border Style="{StaticResource TepsiYuzeyi}">
+                                <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Resources>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Height" Value="34" />
+                        <Setter Property="FontSize" Value="13" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="MenuItem">
+                                    <Border x:Name="Zemin" CornerRadius="4" Background="Transparent" Padding="12,0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                                            <!-- İşaret ve ok sağda: metinler hep aynı hizada kalsın -->
+                                            <TextBlock x:Name="Isaret" Grid.Column="1" Text="✓" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource AccentFillColorDefaultBrush}" Visibility="Collapsed" />
+                                            <TextBlock x:Name="Ok" Grid.Column="1" Text="▸" VerticalAlignment="Center" Visibility="Collapsed" />
+                                            <Popup x:Name="PART_Popup" Placement="Right" HorizontalOffset="2" VerticalOffset="-5"
+                                                   IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                                <Border Style="{StaticResource TepsiYuzeyi}" Width="210">
+                                                    <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                                                </Border>
+                                            </Popup>
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsHighlighted" Value="True">
+                                            <Setter TargetName="Zemin" Property="Background" Value="#10FFFFFF" />
+                                        </Trigger>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="Isaret" Property="Visibility" Value="Visible" />
+                                        </Trigger>
+                                        <Trigger Property="Role" Value="SubmenuHeader">
+                                            <Setter TargetName="Ok" Property="Visibility" Value="Visible" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Separator">
+                                    <Border Height="1" Background="#444444" Margin="0,4" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Style.Resources>
+            </Style>
+        </ResourceDictionary>
+

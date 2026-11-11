@@ -4,7 +4,7 @@ using Wpf.Ui.Controls;
 
 namespace MonsterPerformans;
 
-public partial class MainWindow : FluentWindow
+public partial class MainWindow : FluentWindow, IGezgin
 {
     readonly PanoSayfasi _pano = new();
     readonly FanSayfasi _fan = new();
