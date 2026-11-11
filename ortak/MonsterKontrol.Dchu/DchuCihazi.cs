@@ -38,6 +38,16 @@ public sealed class DchuCihazi : IDchu, IDisposable
         Calistir(() => Yerel.SetDCHU_Data(komut, veri, veri.Length));
     }
 
+    public void TamponYaz(int komut, byte[] veri)
+    {
+        if (veri.Length != VeriBoyu)
+            throw new ArgumentException($"Tampon {VeriBoyu} bayt olmalı", nameof(veri));
+        // Okumadaki taşma yazmada görülmedi ama kanıtlanmadı: prototip gibi geniş tampon, uzunluk 256
+        var tampon = new byte[TamponBoyu];
+        veri.CopyTo(tampon, 0);
+        Calistir(() => Yerel.SetDCHU_Data(komut, tampon, VeriBoyu));
+    }
+
     public byte[] TamponOku(int komut) => Calistir(() =>
     {
         var tampon = new byte[TamponBoyu];

@@ -62,7 +62,7 @@ Diğer firmware modları (MaxQ, Sessiz, IFSC, Noiseless) bu modelde desteklenmiy
 
 #### 2. Fan (eğri düzenleyici)
 
-- EC eğrisi 4 noktalı. **1. nokta (40°C %35) ve 4. nokta (100°C %100) sabit**; yalnız 2. ve 3. nokta sürüklenir.
+- EC eğrisi 4 noktalı. **1. nokta (40°C %35) ve 4. nokta (%100; CPU 100°C, GPU 99°C) sabit**; yalnız 2. ve 3. nokta sürüklenir.
 - Kurallar: t2 < t3, fan % azalmaz. Yanında komut 14 baytları ve eğimler görünür.
 - **Hazır eğriler:** Sessiz / Dengeli / Serin. Seçince noktalar yerleşir, sonra elle ince ayar. Sessiz eğri boşta otomatikten sessiz olamaz (taban %35 sabit); fanın geç ve yavaş yükselmesini sağlar.
 - "Uygula" düğmesi + durum satırı: tampon 13 geri okunur, "eğri doğrulandı" ya da hata.

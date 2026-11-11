@@ -12,5 +12,11 @@ public interface IDchu
     /// <summary>Komutun 256 baytlık okuma tamponunu döndürür.</summary>
     byte[] TamponOku(int komut);
 
+    /// <summary>
+    /// 256 baytlık tampon yazar (ör. 14 = fan eğrisi). Başarı dönmez: geri okuyarak doğrula.
+    /// Varsayılan gövde: klavyedeki sahte uygulamalar bunu yazmak zorunda kalmasın.
+    /// </summary>
+    void TamponYaz(int komut, byte[] veri) => throw new NotSupportedException();
+
     int TamsayiOku(int komut);
 }
