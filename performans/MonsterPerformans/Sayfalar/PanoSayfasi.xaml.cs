@@ -44,13 +44,16 @@ public partial class PanoSayfasi : UserControl
                 Content = p.Ad,
                 Margin = new Thickness(0, 4, 8, 4),
                 Appearance = p.Ad == App.EtkinProfil ? ControlAppearance.Primary : ControlAppearance.Secondary,
-                IsEnabled = App.DonanimVar && !App.Uygulaniyor,
+                IsEnabled = App.DonanimVar && !App.Mesgul,
             };
             b.Click += async (_, _) => await App.Uygula(p);
             ProfilDugmeleri.Children.Add(b);
         }
         Islem.Text = App.Uygulaniyor ? "Uygulanıyor…" : App.SonIslem ?? "Bu oturumda profil uygulanmadı.";
     }
+
+    int _gpuC;
+    DateTime _gpuZaman;
 
     void Guncelle(Olcum o)
     {
@@ -59,9 +62,11 @@ public partial class PanoSayfasi : UserControl
         else { CpuC.Text = "–"; CpuC.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorPrimaryBrush"); }
         CpuAyrinti.Text = string.Format(Tr, "{0:0.0} GHz · yük %{1:0}", o.GercekMHz / 1000, o.Pdh[0]);
 
-        if (o.Gpu is { C: { } gc } g)
+        // NVML sıcaklığı yükte arada boş döndürür: son geçerli değer 5 sn tutulur, kart "Uykuda"ya zıplamasın
+        if (o.Gpu?.C is { } yeni) (_gpuC, _gpuZaman) = (yeni, o.Zaman);
+        if (o.Gpu is { } g && o.Zaman - _gpuZaman <= TimeSpan.FromSeconds(5))
         {
-            Sicaklik(GpuC, gc);
+            Sicaklik(GpuC, _gpuC);
             GpuAyrinti.Text = string.Format(Tr, "{0} MHz · {1:0} W · yük %{2}", g.MHz, g.Watt, g.Kullanim);
         }
         else

@@ -2,7 +2,9 @@ using System.Runtime.InteropServices;
 
 namespace MonsterPerformans.Cekirdek.Sensorler;
 
-public readonly record struct GpuDurumu(int? C, int? Kullanim, double? Watt, int? MHz);
+/// <summary>Kisit: NVML saat kısma nedenleri bit maskesi (güç, ısı, boşta…). VramMB: kullanılan video belleği.</summary>
+public readonly record struct GpuDurumu(int? C, int? Kullanim, double? Watt, int? MHz,
+    int? BellekKullanim = null, int? BellekMHz = null, int? PDurumu = null, ulong? Kisit = null, int? VramMB = null);
 
 /// <summary>
 /// NVIDIA GPU sıcaklığı/gücü (nvml.dll sürücüyle gelir; DCHU bayt 17 GPU çekirdeği değil, docs/01).
@@ -27,15 +29,26 @@ public sealed class Nvml : IDisposable
         return null;
     }
 
-    public GpuDurumu Oku() => new(
-        nvmlDeviceGetTemperature(_cihaz, 0, out var c) == 0 ? (int)c : null,
-        nvmlDeviceGetUtilizationRates(_cihaz, out var k) == 0 ? (int)k.Gpu : null,
-        nvmlDeviceGetPowerUsage(_cihaz, out var mw) == 0 ? mw / 1000.0 : null,
-        nvmlDeviceGetClockInfo(_cihaz, 0, out var mhz) == 0 ? (int)mhz : null);
+    public GpuDurumu Oku()
+    {
+        Kullanim? k = nvmlDeviceGetUtilizationRates(_cihaz, out var kk) == 0 ? kk : null;
+        return new(
+            nvmlDeviceGetTemperature(_cihaz, 0, out var c) == 0 ? (int)c : null,
+            (int?)k?.Gpu,
+            nvmlDeviceGetPowerUsage(_cihaz, out var mw) == 0 ? mw / 1000.0 : null,
+            nvmlDeviceGetClockInfo(_cihaz, 0, out var mhz) == 0 ? (int)mhz : null,
+            (int?)k?.Bellek,
+            nvmlDeviceGetClockInfo(_cihaz, 2, out var bmhz) == 0 ? (int)bmhz : null, // 2 = NVML_CLOCK_MEM
+            nvmlDeviceGetPerformanceState(_cihaz, out var ps) == 0 ? ps : null,
+            nvmlDeviceGetCurrentClocksThrottleReasons(_cihaz, out var kisit) == 0 ? kisit : null,
+            nvmlDeviceGetMemoryInfo(_cihaz, out var bel) == 0 ? (int)(bel.Kullanilan / (1024 * 1024)) : null);
+    }
 
     public void Dispose() => nvmlShutdown();
 
     struct Kullanim { public uint Gpu, Bellek; }
+
+    struct Bellek { public ulong Toplam, Bos, Kullanilan; }
 
     const string Dll = "nvml.dll";
     [DllImport(Dll)] static extern int nvmlInit_v2();
@@ -45,4 +58,7 @@ public sealed class Nvml : IDisposable
     [DllImport(Dll)] static extern int nvmlDeviceGetUtilizationRates(IntPtr cihaz, out Kullanim k);
     [DllImport(Dll)] static extern int nvmlDeviceGetPowerUsage(IntPtr cihaz, out uint miliwatt);
     [DllImport(Dll)] static extern int nvmlDeviceGetClockInfo(IntPtr cihaz, int tur, out uint mhz);
+    [DllImport(Dll)] static extern int nvmlDeviceGetPerformanceState(IntPtr cihaz, out int pDurumu);
+    [DllImport(Dll)] static extern int nvmlDeviceGetCurrentClocksThrottleReasons(IntPtr cihaz, out ulong nedenler);
+    [DllImport(Dll)] static extern int nvmlDeviceGetMemoryInfo(IntPtr cihaz, out Bellek bellek);
 }

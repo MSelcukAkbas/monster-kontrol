@@ -35,7 +35,8 @@ public class ProfilTestleri
         Assert.Equal((2870u, 2870u), p.IslemciAyariOku(kopya, WindowsGucPlani.FrekansSiniri));
         Assert.Equal((0u, 0u), p.IslemciAyariOku(kopya, WindowsGucPlani.TurboModu));
         Assert.DoesNotContain(p.Degerler.Keys, k => k.Plan == Temel); // temel plana dokunulmadı
-        Assert.Equal([(0x79, 0x1900_0000L), (14, -1L), (0x79, 0x0100_0006L)], d.Yazilanlar);
+        // güç → (plan) → fan: eğri Sessiz'de yazılır, güç yeniden yazılır, mod 6 en son (güç yazması özel modu bozar)
+        Assert.Equal([(0x79, 0x1900_0000L), (0x79, 0x1900_0000L), (14, -1L), (0x79, 0x1900_0000L), (0x79, 0x0100_0006L)], d.Yazilanlar);
     }
 
     [Fact]
@@ -61,8 +62,19 @@ public class ProfilTestleri
         var (u, d, _) = Kur(yansit: false);
         var s = u.Uygula(new("T", GucSeviyesi.Eglence, Temel, 100, true, FanModu.Ozel, Egri, Egri));
         Assert.Equal(AdimDurumu.Basarisiz, s[2].Durum);
-        Assert.Equal((0x69, 0x0FL), d.Yazilanlar[^1]);
+        Assert.Equal([(0x79, 0x1900_0000L), (0x79, 0x0100_0000L), (0x69, 0x0FL), (0x79, 0x1900_0003L)], d.Yazilanlar[^4..]);
         Assert.DoesNotContain((0x79, 0x0100_0006L), d.Yazilanlar);
+    }
+
+    [Fact]
+    public void Dogrulama_politikasi_guvenli_durum_hepsini_geri_alir()
+    {
+        var (u, d, p) = Kur(yansit: false);
+        var s = u.Uygula(new("T", GucSeviyesi.Performans, Temel, 70, true, FanModu.Ozel, Egri, Egri), DogrulamaPolitikasi.GuvenliDurum);
+        Assert.Equal(6, s.Count);
+        Assert.Equal(WindowsGucPlani.Dengeli, p.Etkin);
+        Assert.Equal((0x79, 0x1900_0003L), d.Yazilanlar[^1]);
+        Assert.Equal(2, d.Yazilanlar.Count(y => y.Komut == 14)); // eğri bir kez daha denendi
     }
 
     [Fact]
@@ -71,7 +83,16 @@ public class ProfilTestleri
         var (u, d, _) = Kur();
         var s = u.Uygula(new("T", GucSeviyesi.Eglence, Temel, 100, true, FanModu.Ozel)); // varsayılan eğri geçersiz
         Assert.Equal(AdimDurumu.Basarisiz, s[2].Durum);
-        Assert.Equal([(0x79, 0x1900_0003L), (0x79, 0x0100_0000L), (0x69, 0x0FL)], d.Yazilanlar);
+        Assert.Equal([(0x79, 0x1900_0003L), (0x79, 0x1900_0000L), (0x79, 0x1900_0000L), (0x79, 0x0100_0000L), (0x69, 0x0FL), (0x79, 0x1900_0003L)], d.Yazilanlar);
+    }
+
+    // Eğlence'deyken mod 0 + 0x69 fanları %95'e fırlatıyor (Gunluk 11.11 18:58:22): otomatiğe hep Sessiz'de geçilir (güvenli durum: ProfilDeposuTestleri)
+    [Fact]
+    public void Fan_otomatige_guc_sessizdeyken_alinir()
+    {
+        var (u, d, _) = Kur();
+        u.Uygula(new("T", GucSeviyesi.Eglence, Temel, 100, true, FanModu.Otomatik));
+        Assert.Equal([(0x79, 0x1900_0003L), (0x79, 0x1900_0000L), (0x79, 0x0100_0000L), (0x69, 0x0FL), (0x79, 0x1900_0003L)], d.Yazilanlar);
     }
 
     internal sealed class SahtePlan : IGucPlani

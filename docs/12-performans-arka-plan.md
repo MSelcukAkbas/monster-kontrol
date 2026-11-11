@@ -113,7 +113,7 @@ Kullanıcı CC'de custom eğriyi değiştirdi (CPU 53°C → %98, GPU 61°C → 
 | # | Soru | Yöntem | Onay |
 |---|---|---|---|
 | A | ✅ **Eğriyi biz yazabiliyor muyuz?** Evet: `SetDCHU_Data(14)` (A''), doğrulama `GetDCHU_Data_Buffer(13)`. Sayfa 4 yalnız CC'nin kaydı (A' ❌). Açık: EC belleği geçici → uyku/yeniden başlatmada eğri kalıyor mu (B) | Komut 14 gönder → tampon 13 oku → mod 6 → geri gönder | Fan yazması, kullanıcı onayı |
-| B | **Custom mod kalıcı mı?** Kullanıcı gözlemi (ölçülmedi): CC'de custom eğri seçiliyken bilgisayar kapanıp açılınca otomatik moda dönüyor → uygulama açılışta (ve büyük olasılıkla uyanmada) mod 6 + komut 14'ü yeniden göndermeli | Uyku → uyanma, yeniden başlatma sonrası duty sıcaklığı izliyor mu; sayfa 4 ofset 5 (CC'nin mod kaydı) açılışta uygulanıyor mu | Kullanıcı (yeniden başlatma) |
+| B | **Custom mod kalıcı mı?** (Uygulama hazır: Ayarlar → "Açılışta ve uykudan dönüşte son profili yeniden uygula"; ölçüm bekliyor) Kullanıcı gözlemi (ölçülmedi): CC'de custom eğri seçiliyken bilgisayar kapanıp açılınca otomatik moda dönüyor → uygulama açılışta (ve büyük olasılıkla uyanmada) mod 6 + komut 14'ü yeniden göndermeli | Uyku → uyanma, yeniden başlatma sonrası duty sıcaklığı izliyor mu; sayfa 4 ofset 5 (CC'nin mod kaydı) açılışta uygulanıyor mu | Kullanıcı (yeniden başlatma) |
 | C | ✅ **EC** — servis kapalıyken de eğri izleniyor | Test 20: servis durdurulmuşken custom eğri | 🔐 |
 | D | **Eğri tasarımı** | EC histerezissiz ve ham bayt 18'i izliyor → 70–88°C bandında yatık eğri, taban yüksek; test 21 (dB↔RPM) ile rezonans aralıkları | — |
 | E | **GPU yükünde** | Test 17: GPU fanı neyi izliyor, CPU fanı GPU ısısına tepki veriyor mu (ortak boru) | — |

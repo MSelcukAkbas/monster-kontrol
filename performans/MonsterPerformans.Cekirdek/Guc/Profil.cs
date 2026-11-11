@@ -15,20 +15,31 @@ public enum AdimDurumu { Yazildi, Dogrulandi, Basarisiz }
 
 public sealed record AdimSonucu(string Adim, AdimDurumu Durum, string? Hata = null);
 
+/// <summary>Fan adımı başarısız olunca (docs/04 Ayarlar): yalnız fan otomatiğe döner ya da her şey güvenli duruma döner.</summary>
+public enum DogrulamaPolitikasi { FanOtomatik, GuvenliDurum }
+
 /// <summary>
 /// Profili uygular: güç seviyesi → Windows planı (kopya) → fan. Adımlar birbirinden bağımsız; biri başarısız
-/// olursa öncekiler geri alınmaz. Fan en sonda: tek doğrulamalı ve güvenli dönüşlü adım o.
+/// olursa öncekiler geri alınmaz. İki EC kuralı (Gunluk 11.11): güç Eğlence'deyken yazılan mod 0 + 0x69 fanları
+/// ~%95'e fırlatıyor, Sessiz'deyken fırlatmıyor; güç yazması özel modu otomatiğe çeviriyor (19:36 Dengeli 90°C'de %35).
+/// Bu yüzden fan adımı otomatiğe Sessiz üzerinden geçer ve fan modunu güçten sonra, en son yazar.
 /// </summary>
 public sealed class ProfilUygulayici(IDchu dchu, IGucPlani plan, FanKontrol fan)
 {
     /// <summary>i5-10200H en yüksek turbo (docs/01).</summary>
     public const int EnYuksekMhz = 4100;
 
-    public IReadOnlyList<AdimSonucu> Uygula(Profil p) => [Guc(p), Plan(p), Fan(p)];
+    public IReadOnlyList<AdimSonucu> Uygula(Profil p, DogrulamaPolitikasi politika = DogrulamaPolitikasi.FanOtomatik)
+    {
+        List<AdimSonucu> s = [Guc(p), Plan(p), Fan(p)];
+        if (s[2].Durum == AdimDurumu.Basarisiz && politika == DogrulamaPolitikasi.GuvenliDurum)
+            s.AddRange(GuvenliDurum().Select(a => a with { Adim = "Güvenli durum: " + a.Adim }));
+        return s;
+    }
 
     AdimSonucu Guc(Profil p) => Dene("Güç seviyesi", () =>
     {
-        dchu.Yaz(Komutlar.Secenek, (0x19u << 24) | (uint)p.Guc);
+        GucYaz(p.Guc);
         return AdimDurumu.Yazildi; // geri okunacak yer bilinmiyor
     });
 
@@ -54,26 +65,32 @@ public sealed class ProfilUygulayici(IDchu dchu, IGucPlani plan, FanKontrol fan)
         {
             switch (p.Fan)
             {
-                case FanModu.Otomatik: fan.GuvenliDurum(); return AdimDurumu.Yazildi;
+                case FanModu.Otomatik: FanOtomatigeDon(p.Guc); return AdimDurumu.Yazildi;
                 case FanModu.Maksimum: fan.ModAyarla(FanModu.Maksimum); return AdimDurumu.Yazildi;
                 default:
-                    return fan.OzelEgriUygula(p.CpuEgrisi, p.GpuEgrisi)
+                    // Eğri otomatik modda yazılır (doğrulanamazsa fırlamadan döner); EC bazen ilk yazmayı geç gösterir: bir kez daha
+                    SessizeAl();
+                    if (!fan.EgriYaz(p.CpuEgrisi, p.GpuEgrisi) && !fan.EgriYaz(p.CpuEgrisi, p.GpuEgrisi))
+                        throw new InvalidOperationException("Eğri doğrulanamadı, fan otomatiğe döndü");
+                    GucYaz(p.Guc);
+                    fan.ModAyarla(FanModu.Ozel);
+                    return fan.EcEgrisi() == (p.CpuEgrisi, p.GpuEgrisi)
                         ? AdimDurumu.Dogrulandi
-                        : throw new InvalidOperationException("Eğri doğrulanamadı, fan otomatiğe döndü");
+                        : throw new InvalidOperationException("Özel modda eğri değişti, fan otomatiğe döndü");
             }
         });
         if (s.Durum == AdimDurumu.Basarisiz)
-            Dene("Fan güvenli durum", () => { fan.GuvenliDurum(); return AdimDurumu.Yazildi; });
+            Dene("Fan güvenli durum", () => { FanOtomatigeDon(p.Guc); return AdimDurumu.Yazildi; });
         return s;
     }
 
     /// <summary>CLAUDE.md güvenli durumu: fan otomatik (mod 0 + 0x69), güç eğlence, Dengeli planın kendisi (kopya değil).</summary>
     public IReadOnlyList<AdimSonucu> GuvenliDurum() =>
     [
-        Dene("Fan", () => { fan.GuvenliDurum(); return AdimDurumu.Yazildi; }),
+        Dene("Fan", () => { SessizeAl(); fan.GuvenliDurum(); return AdimDurumu.Yazildi; }),
         Dene("Güç seviyesi", () =>
         {
-            dchu.Yaz(Komutlar.Secenek, (0x19u << 24) | (uint)GucSeviyesi.Eglence);
+            GucYaz(GucSeviyesi.Eglence);
             return AdimDurumu.Yazildi;
         }),
         Dene("Windows planı", () =>
@@ -82,6 +99,18 @@ public sealed class ProfilUygulayici(IDchu dchu, IGucPlani plan, FanKontrol fan)
             return plan.Etkin == WindowsGucPlani.Dengeli ? AdimDurumu.Dogrulandi : throw new InvalidOperationException("Dengeli etkinleşmedi");
         }),
     ];
+
+    /// <summary>Fan otomatiğe (fırlamasın diye güç Sessiz üzerinden), sonra güç <paramref name="guc"/>'e döner. Çıkışta da kullanılır.</summary>
+    public void FanOtomatigeDon(GucSeviyesi guc)
+    {
+        SessizeAl();
+        fan.GuvenliDurum();
+        GucYaz(guc);
+    }
+
+    void SessizeAl() => GucYaz(GucSeviyesi.Sessiz);
+
+    void GucYaz(GucSeviyesi g) => dchu.Yaz(Komutlar.Secenek, (0x19u << 24) | (uint)g);
 
     /// <summary>%100 = sınırsız (0); aksi halde en yüksek turbonun yüzdesi, MHz.</summary>
     public static uint FrekansMhz(int yuzde) => yuzde >= 100 ? 0u : (uint)(yuzde * EnYuksekMhz / 100);

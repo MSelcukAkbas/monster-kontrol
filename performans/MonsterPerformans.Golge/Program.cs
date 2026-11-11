@@ -2,6 +2,7 @@
 // Kullanım: MonsterPerformans.Golge [kayıt klasörü]   (varsayılan %LocalAppData%\MonsterPerformans\kayit) — Ctrl+C ile durur.
 using MonsterKontrol.Dchu;
 using MonsterPerformans.Cekirdek;
+using MonsterPerformans.Cekirdek.Guc;
 using MonsterPerformans.Cekirdek.Sensorler;
 
 var klasor = args.Length > 0 ? args[0]
@@ -14,7 +15,7 @@ using var dchu = new DchuCihazi();
 using var pdh = new PdhSayaclari();
 using var nvml = Nvml.Ac();
 using var kayitci = new CsvKayitci(klasor);
-var ornekleyici = new Ornekleyici(dchu, pdh, nvml);
+var ornekleyici = new Ornekleyici(dchu, pdh, nvml, new BaglamOkuyucu(new WindowsGucPlani()));
 Console.WriteLine($"Kayıt: {klasor}  DLL: {dchu.DllYolu}  NVML: {(nvml is null ? "yok" : "var")}");
 
 using var saat = new PeriodicTimer(TimeSpan.FromSeconds(1));

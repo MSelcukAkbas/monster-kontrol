@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using Microsoft.Win32;
 using MonsterKontrol.Dchu;
 using MonsterPerformans.Cekirdek;
 using MonsterPerformans.Cekirdek.Fan;
@@ -35,6 +36,12 @@ public partial class App : Application
 
     public static bool DonanimVar => _uygulayici is not null;
 
+    /// <summary>"Ölçüm yap" sürüyor. Profil düğmeleri griye döner; acil durum yine çalışır.</summary>
+    public static bool OlcumSuruyor { get; private set; }
+
+    /// <summary>Kullanıcının profil yazması beklemeli.</summary>
+    public static bool Mesgul => Uygulaniyor || OlcumSuruyor;
+
     /// <summary>Profil listesi, etkin profil ya da uygulama durumu değişti.</summary>
     public static event Action? DurumDegisti;
 
@@ -48,6 +55,20 @@ public partial class App : Application
     static ProfilUygulayici? _uygulayici;
     static FanKontrol? _fan;
     static bool _fanDegisti; // fan bu oturumda otomatikten çıkarıldı: çıkışta güvenli duruma dön (bekçi yok)
+
+    /// <summary>Kullanıcının son seçtiği profil: acil durum bunun kısılmış halini yazar, bitince bunu geri yükler.</summary>
+    static Profil? _temel;
+    static readonly AcilDurum _acil = new();
+    static AcilKademe _uygulananKademe;
+
+    /// <summary>Uygulanmış acil kademe (Yok: acil durum yok).</summary>
+    public static AcilKademe AcilKademe => _uygulananKademe;
+
+    const int KayitGun = 30;
+    static volatile string? _kayitKlasoru; // null: kayıt kapalı. Örnekleyici iş parçacığı okur
+    CsvKayitci? _csv; // yalnız örnekleyici iş parçacığında
+    string? _csvKlasoru;
+    DateOnly _temizlik;
 
     DchuCihazi? _dchu;
     PdhSayaclari? _pdh;
@@ -81,10 +102,15 @@ public partial class App : Application
         _nvml = Nvml.Ac();
         NvmlVar = _nvml is not null;
         Ayarlar = PerformansAyarlari.Oku(PerformansAyarlari.VarsayilanYol);
+        AyarlariYansit();
 
-        // Açılışta yalnız okuma; donanıma yazan tek şey kullanıcının bastığı düğmeler
+        // Açılışta yalnız okuma; yeniden uygulama ayarı açıksa son profil 3 sn sonra yazılır
         if (_dchu is not null)
-            _ornekleme = Task.Run(() => Ornekle(new Ornekleyici(_dchu, _pdh, _nvml), _dur.Token));
+        {
+            _ornekleme = Task.Run(() => Ornekle(new Ornekleyici(_dchu, _pdh, _nvml, new BaglamOkuyucu(new WindowsGucPlani())), _dur.Token));
+            _ = YenidenUygula("Açılış");
+            SystemEvents.PowerModeChanged += GucDegisti;
+        }
 
         WindowsIleBaslat.YoluTazele();
         MainWindow = new MainWindow();
@@ -111,7 +137,9 @@ public partial class App : Application
                         Gecmis.Ekle(o);
                         PlanAdi = ad;
                         YeniOlcum?.Invoke(o);
+                        AcilKontrol(o);
                     });
+                    Kaydet(o);
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
@@ -122,19 +150,174 @@ public partial class App : Application
         catch (OperationCanceledException) { }
     }
 
-    /// <summary>Profili arka planda uygular (eğri doğrulaması ~1 sn bekleyebilir). Aynı anda yalnız bir uygulama.</summary>
-    public static Task Uygula(Profil p) => Calistir(u =>
+    /// <summary>
+    /// Profili arka planda uygular (eğri doğrulaması ~1 sn bekleyebilir). Aynı anda yalnız bir uygulama.
+    /// Acil durum sürüyorsa profilin kısılmış hali yazılır. <paramref name="kalici"/>: açılışta yeniden uygulanacak profil olarak sakla.
+    /// </summary>
+    public static Task Uygula(Profil p, bool kalici = true, string? neden = null)
     {
-        if (p.Fan != FanModu.Otomatik) _fanDegisti = true; // yazma yarıda kalsa da çıkışta geri alınsın
-        return u.Uygula(p);
-    }, p.Ad, p.Ad);
+        if (_uygulayici is null || Uygulaniyor) return Task.CompletedTask;
+        _temel = p;
+        if (kalici && Ayarlar.SonProfil != p.Ad) { Ayarlar.SonProfil = p.Ad; AyarlarDegisti(); }
+        var k = _uygulananKademe = _acil.Kademe;
+        var baslik = (neden is null ? "" : neden + ": ") + p.Ad + (k == AcilKademe.Yok ? "" : $" (acil durum: {AcilDurum.Ad(k)})");
+        return ProfilYaz(AcilDurum.Uyarla(p, k), baslik);
+    }
 
-    public static Task GuvenliDurumaDon() => Calistir(u =>
+    public static Task GuvenliDurumaDon()
+    {
+        if (_uygulayici is null || Uygulaniyor) return Task.CompletedTask;
+        _temel = null;
+        if (Ayarlar.SonProfil is not null) { Ayarlar.SonProfil = null; AyarlarDegisti(); }
+        _uygulananKademe = AcilKademe.Yok; // acil durum sürüyorsa sonraki örnek Dengeli üstünden yeniden kısar
+        return GuvenliYaz("Güvenli durum");
+    }
+
+    static Task ProfilYaz(Profil p, string baslik)
+    {
+        var politika = Ayarlar.DogrulamaHatasi;
+        return Calistir(u =>
+        {
+            if (p.Fan != FanModu.Otomatik) _fanDegisti = true; // yazma yarıda kalsa da çıkışta geri alınsın
+            return u.Uygula(p, politika);
+        }, baslik, _temel?.Ad);
+    }
+
+    static Task GuvenliYaz(string baslik) => Calistir(u =>
     {
         var s = u.GuvenliDurum();
         _fanDegisti = false;
         return s;
-    }, "Güvenli durum", null);
+    }, baslik, null);
+
+    /// <summary>
+    /// Her örnekte (arayüz iş parçacığı). Kademe değişince profili kısarak yazar; başka bir yazma sürüyorsa
+    /// sonraki örnekte yeniden dener (kademe ancak yazma başlarken işaretlenir).
+    /// </summary>
+    static void AcilKontrol(Olcum o)
+    {
+        var k = _acil.Adim(o.Dchu.Gecerli ? o.Dchu.CpuC : null, o.Gpu?.C);
+        if (k == _uygulananKademe || Uygulaniyor || _uygulayici is null) return;
+        _uygulananKademe = k;
+        var neden = (o.Dchu.Gecerli ? $"CPU {o.Dchu.CpuC}°C" : "CPU okunamadı") + (o.Gpu?.C is { } g ? $", GPU {g}°C" : "");
+        if (k != AcilKademe.Yok)
+            _ = ProfilYaz(AcilDurum.Uyarla(_temel ?? HazirProfiller.Dengeli, k), $"Acil durum ({neden}): {AcilDurum.Ad(k)}");
+        else if (_temel is { } t)
+            _ = ProfilYaz(t, $"Acil durum bitti ({neden}): {t.Ad} geri yüklendi");
+        else
+            _ = GuvenliYaz($"Acil durum bitti ({neden}): güvenli durum");
+    }
+
+    /// <summary>docs/03: açılışta ve uykudan dönüşte 3 sn bekle (EC ve sürücü otursun), sonra son profili yeniden yaz.</summary>
+    static async Task YenidenUygula(string neden)
+    {
+        if (!Ayarlar.YenidenUygula) return;
+        await Task.Delay(TimeSpan.FromSeconds(3));
+        if (Ayarlar.YenidenUygula && !Cikiliyor && !OlcumSuruyor && (_temel ?? Ayarlar.Bul(Ayarlar.SonProfil)) is { } p)
+            await Uygula(p, neden: neden);
+    }
+
+    /// <summary>
+    /// Profili geçici uygular, CPU + GPU'yu <paramref name="saniye"/> boyunca yükler, sonra önceki profile
+    /// (yoksa güvenli duruma) döner. CPU 95°C'yi görür ya da acil durum başlarsa hemen keser.
+    /// </summary>
+    public static async Task<(OlcumSonucu? Sonuc, string? Kiyas)> OlcumYap(Profil p, int saniye, Action<string> durum, CancellationToken iptal)
+    {
+        if (_uygulayici is null || Mesgul) return (null, null);
+        OlcumSuruyor = true;
+        DurumDegisti?.Invoke();
+        var onceki = _temel;
+        var ornekler = new List<Olcum>();
+        string? kesildi = null;
+        using var dur = CancellationTokenSource.CreateLinkedTokenSource(iptal);
+        void Topla(Olcum o)
+        {
+            ornekler.Add(o);
+            if (o.Dchu.Gecerli && o.Dchu.CpuC >= 95) kesildi ??= $"CPU {o.Dchu.CpuC}°C'de kesildi";
+            else if (_acil.Kademe != AcilKademe.Yok) kesildi ??= "acil durum nedeniyle kesildi";
+            if (kesildi is not null) dur.Cancel();
+            durum($"Yük altında {ornekler.Count}/{saniye} sn · CPU {(o.Dchu.Gecerli ? $"{o.Dchu.CpuC}°C" : "–")}"
+                  + (o.Gpu?.C is { } g ? $" · GPU {g}°C" : ""));
+        }
+        var gpuYuku = false;
+        try
+        {
+            durum($"{p.Ad} uygulanıyor…");
+            await Uygula(p, kalici: false, neden: "Ölçüm");
+            dur.CancelAfter(TimeSpan.FromSeconds(saniye));
+            YeniOlcum += Topla;
+            var cpu = Yuk.Cpu(dur.Token);
+            var gpu = Yuk.Gpu(dur.Token);
+            try { gpuYuku = await gpu; }
+            catch (Exception ex) // GPU yükü isteğe bağlı: ne olursa olsun CPU yükü sürer
+            {
+                Olay($"Ölçüm: GPU yükü başlamadı ({ex.Message}), yalnız CPU yüklendi");
+            }
+            await cpu;
+        }
+        finally
+        {
+            dur.Cancel(); // hata ile çıkılsa da yük iş parçacıkları dursun
+            YeniOlcum -= Topla;
+            durum("Önceki duruma dönülüyor…");
+            while (Uygulaniyor) await Task.Delay(200); // acil yazma sürüyorsa bitsin, geri dönüş düşmesin
+            if (onceki is not null) await Uygula(onceki, kalici: false, neden: "Ölçüm bitti");
+            else
+            {
+                _temel = null;
+                _uygulananKademe = AcilKademe.Yok; // acil durum sürüyorsa sonraki örnek yeniden kısar
+                await GuvenliYaz("Ölçüm bitti: güvenli durum");
+            }
+            OlcumSuruyor = false;
+            DurumDegisti?.Invoke();
+        }
+
+        if (kesildi is null && iptal.IsCancellationRequested) kesildi = "iptal edildi";
+        var s = OlcumSonucu.Ozetle(p.Ad, DateTime.Now, saniye, ornekler, gpuYuku, kesildi);
+        if (s is null) return (null, null);
+        var kiyas = s.Kiyas(OlcumSonucu.Oku(OlcumSonucu.VarsayilanYol));
+        try { OlcumSonucu.Ekle(OlcumSonucu.VarsayilanYol, s); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Debug.WriteLine($"Ölçüm saklanamadı: {ex.Message}"); }
+        Olay($"Ölçüm {p.Ad} {saniye} sn: {s.Satir()}" + (kiyas is null ? "" : $" · {kiyas}"));
+        return (s, kiyas);
+    }
+
+    void GucDegisti(object? sender, PowerModeChangedEventArgs e)
+    {
+        if (e.Mode == PowerModes.Resume) Dispatcher.BeginInvoke(() => YenidenUygula("Uykudan dönüş"));
+    }
+
+    /// <summary>Örnekleyici iş parçacığında: günlük CSV (ham tampon dahil); 30 günden eskiler dakikalık özete iner.</summary>
+    void Kaydet(Olcum o)
+    {
+        var klasor = _kayitKlasoru;
+        if (klasor != _csvKlasoru)
+        {
+            _csv?.Dispose();
+            _csv = klasor is null ? null : new CsvKayitci(klasor);
+            _csvKlasoru = klasor;
+        }
+        if (_csv is null) return;
+        var bugun = DateOnly.FromDateTime(o.Zaman);
+        if (bugun != _temizlik)
+        {
+            _temizlik = bugun;
+            CsvKayitci.Temizle(klasor!, KayitGun, bugun);
+        }
+        _csv.Yaz(o, new UygulamaDurumu(EtkinProfil, _temel?.Fan.ToString(), _uygulananKademe.ToString(), OlcumSuruyor));
+    }
+
+    /// <summary>Uygulama, acil durum ve doğrulama olayları: kayıt klasöründe olaylar.log.</summary>
+    static void Olay(string satir)
+    {
+        if (_kayitKlasoru is not { } k) return;
+        try
+        {
+            Directory.CreateDirectory(k);
+            File.AppendAllText(Path.Combine(k, "olaylar.log"), $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {satir}{Environment.NewLine}");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Debug.WriteLine($"Olay yazılamadı: {ex.Message}"); }
+    }
 
     static async Task Calistir(Func<ProfilUygulayici, IReadOnlyList<AdimSonucu>> islem, string baslik, string? etkin)
     {
@@ -146,6 +329,7 @@ public partial class App : Application
             var s = await Task.Run(() => islem(u));
             EtkinProfil = etkin;
             SonIslem = $"{baslik} · {Ozet(s)}";
+            Olay(SonIslem);
         }
         finally
         {
@@ -164,9 +348,16 @@ public partial class App : Application
     /// <summary>Profil listesi değişince çağrılır: diske yazar ve sayfaları/tepsiyi yeniler.</summary>
     public static void AyarlarDegisti()
     {
+        AyarlariYansit();
         try { Ayarlar.Yaz(PerformansAyarlari.VarsayilanYol); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Debug.WriteLine($"Ayarlar yazılamadı: {ex.Message}"); }
         DurumDegisti?.Invoke();
+    }
+
+    static void AyarlariYansit()
+    {
+        _acil.Esik = Ayarlar.AcilEsik;
+        _kayitKlasoru = Ayarlar.KayitTut ? Ayarlar.Kayit : null;
     }
 
     public static void PencereyiGoster()
@@ -191,11 +382,13 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        SystemEvents.PowerModeChanged -= GucDegisti;
         _dur.Cancel();
         _ornekleme?.Wait(TimeSpan.FromSeconds(2));
+        _csv?.Dispose();
         if (_fanDegisti)
         {
-            try { _fan?.GuvenliDurum(); }
+            try { _uygulayici?.FanOtomatigeDon(AcilDurum.Uyarla(_temel ?? HazirProfiller.Dengeli, _uygulananKademe).Guc); }
             catch (Exception ex) { Debug.WriteLine($"Çıkışta fan güvenli duruma dönmedi: {ex.Message}"); }
         }
         _tepsi?.Dispose();

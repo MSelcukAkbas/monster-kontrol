@@ -34,7 +34,7 @@ public partial class HizliPanel : Window
 
     void Profiller()
     {
-        var etkin = App.DonanimVar && !App.Uygulaniyor;
+        var etkin = App.DonanimVar && !App.Mesgul;
         foreach (Wpf.Ui.Controls.Button d in HazirDugmeler.Children)
         {
             d.IsEnabled = etkin;

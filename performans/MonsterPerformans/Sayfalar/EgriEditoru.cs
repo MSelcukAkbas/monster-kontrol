@@ -118,7 +118,7 @@ public sealed class EgriEditoru : FrameworkElement
         var e = _egri;
         var tMax = Math.Max(e.T2 + 1, Math.Min(_t4, KorumaBandi) - 1); // elle düzenlenmiş eğri bandın içindeyse Clamp patlamasın
         e = nokta == 2
-            ? e with { T2 = Math.Clamp(t, FanEgrisi.T1 + 1, e.T3 - 1), D2 = Math.Clamp(d, FanEgrisi.D1, e.D3) }
+            ? e with { T2 = Math.Clamp(t, FanEgrisi.T1 + 1, e.T3 - 1), D2 = Math.Clamp(d, FanEgrisi.EnAz, e.D3) }
             : e with { T3 = Math.Clamp(t, e.T2 + 1, tMax), D3 = Math.Clamp(d, e.D2, FanEgrisi.D4) };
         if (e == _egri) return;
         _egri = e;

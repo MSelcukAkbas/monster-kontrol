@@ -86,8 +86,8 @@ Ayrıntı: [03](03-mimari.md), [10](10-veri-envanteri-ve-ogrenen-model.md). Önc
 | P0 | Sensör okuma + kayıt (gölge mod): tampon 12, PDH (İngilizce adlarla), NVML, (PawnIO/LHM) → 1 Hz CSV |
 | P1 | Pano arayüzü (sıcaklıklar, fanlar, frekans, güç, profil) — salt okuma |
 | P2 | Güç profili + frekans tavanı (Windows planı) kontrolü |
-| P3 | Fan eğrisi + acil durum + geri okuma karşılaştırması, tek exe içinde |
-| P4 | Fan bekçisi (servis ya da bekçi süreç) + kaçış yolları |
+| P3 | Fan eğrisi + acil durum + geri okuma karşılaştırması, tek exe içinde — P0–P3 kodlandı (dallar `performans/p0`, `performans/p1`) |
+| P4 | Fan bekçisi (servis ya da bekçi süreç) + kaçış yolları — büyük olasılıkla gereksiz: EC eğriyi kendisi uyguluyor ([12](12-performans-arka-plan.md) §2) |
 | P5 | Çevrimiçi optimizasyon (tek düğme: frekans tavanı) |
 | P6 | Monster uygulamalarını kaldırma (06) |
 

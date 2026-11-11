@@ -7,8 +7,11 @@ namespace MonsterPerformans.Cekirdek.Guc;
 /// <summary>Kilitli 3 profil. Kodda durur, JSON'a yazılmaz: dosya elle bozulsa da değişmezler.</summary>
 public static class HazirProfiller
 {
-    public static readonly Profil Sessiz = new("Sessiz", GucSeviyesi.Sessiz, WindowsGucPlani.Dengeli, 70, false, FanModu.Otomatik);
-    public static readonly Profil Dengeli = new("Dengeli", GucSeviyesi.Eglence, WindowsGucPlani.Dengeli, 100, true, FanModu.Otomatik);
+    // Otomatik modun tabanı EC'de %35: Sessiz ve Dengeli %10'a inebilsin diye özel eğri kullanır
+    public static readonly Profil Sessiz = new("Sessiz", GucSeviyesi.Sessiz, WindowsGucPlani.Dengeli, 70, false,
+        FanModu.Ozel, HazirEgriler.Sessiz, HazirEgriler.Sessiz);
+    public static readonly Profil Dengeli = new("Dengeli", GucSeviyesi.Eglence, WindowsGucPlani.Dengeli, 100, true,
+        FanModu.Ozel, HazirEgriler.Dengeli, HazirEgriler.Dengeli);
     public static readonly Profil Performans = new("Performans", GucSeviyesi.Performans, WindowsGucPlani.Dengeli, 100, true, FanModu.Maksimum);
 
     public static IReadOnlyList<Profil> Hepsi { get; } = [Sessiz, Dengeli, Performans];
@@ -16,17 +19,20 @@ public static class HazirProfiller
     public static bool Kilitli(Profil p) => Hepsi.Any(h => ReferenceEquals(h, p));
 }
 
-/// <summary>Fan sayfasındaki hazır eğriler (2. ve 3. nokta). Taban %35 EC'de sabit: Sessiz yalnız geç ve yavaş yükselir.</summary>
+/// <summary>
+/// Fan sayfasındaki hazır eğriler (2. ve 3. nokta). Sessiz ve Dengeli 41°C'de %10'dan başlar: 40°C ile t2 arası
+/// ölçülmedi, t2 hemen 40'ın üstünde tutulunca o bölge 1°C'ye iner.
+/// </summary>
 public static class HazirEgriler
 {
+    public static readonly FanEgrisi Sessiz = new(41, FanEgrisi.EnAz, 80, 40), Dengeli = new(41, FanEgrisi.EnAz, 80, 80);
+
     public static IReadOnlyList<(string Ad, FanEgrisi Egri)> Hepsi { get; } =
     [
-        ("Sessiz", new(65, 40, 85, 70)),
-        ("Dengeli", new(55, 50, 80, 80)),
+        ("Sessiz", Sessiz),
+        ("Dengeli", Dengeli),
         ("Serin", new(50, 55, 70, 90)),
     ];
-
-    public static FanEgrisi Dengeli => Hepsi[1].Egri;
 }
 
 /// <summary>%AppData%\MonsterPerformans\ayarlar.json: kullanıcı profilleri ve tepsideki tek profil.</summary>
@@ -36,6 +42,28 @@ public sealed class PerformansAyarlari
 
     /// <summary>Tepside en fazla bir kullanıcı profili: tek alan olduğu için kendiliğinden doğru.</summary>
     public string? TepsiProfili { get; set; }
+
+    /// <summary>Acil durum eşiği, 92–95°C.</summary>
+    public int AcilEsik { get; set; } = AcilDurum.VarsayilanEsik;
+
+    /// <summary>Açılışta ve uykudan dönüşte son profili yeniden uygula. Kapalı başlar: gözetimsiz yazma kullanıcının seçimi.</summary>
+    public bool YenidenUygula { get; set; }
+
+    /// <summary>Son uygulanan profil (güvenli duruma dönünce silinir).</summary>
+    public string? SonProfil { get; set; }
+
+    public DogrulamaPolitikasi DogrulamaHatasi { get; set; }
+
+    public bool KayitTut { get; set; } = true;
+
+    /// <summary>Boşsa <see cref="VarsayilanKayitKlasoru"/>.</summary>
+    public string? KayitKlasoru { get; set; }
+
+    [JsonIgnore]
+    public string Kayit => string.IsNullOrWhiteSpace(KayitKlasoru) ? VarsayilanKayitKlasoru : KayitKlasoru;
+
+    public static string VarsayilanKayitKlasoru { get; } = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MonsterPerformans", "Gunluk"); // gölge kaydedicinin "kayit" klasörü değil: temizlik ham veriyi silmesin
 
     public static string VarsayilanYol { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MonsterPerformans", "ayarlar.json");
@@ -55,6 +83,9 @@ public sealed class PerformansAyarlari
             .Select(p => p with { FrekansYuzde = Math.Clamp(p.FrekansYuzde, 1, 100) })
             .ToList();
         if (a.Profiller.All(p => p.Ad != a.TepsiProfili)) a.TepsiProfili = null;
+        if (a.Bul(a.SonProfil) is null) a.SonProfil = null;
+        a.AcilEsik = Math.Clamp(a.AcilEsik, AcilDurum.VarsayilanEsik, AcilDurum.EnYuksekEsik);
+        if (!Enum.IsDefined(a.DogrulamaHatasi)) a.DogrulamaHatasi = default;
         return a;
     }
 
@@ -68,6 +99,8 @@ public sealed class PerformansAyarlari
     }
 
     public IEnumerable<Profil> Hepsi => HazirProfiller.Hepsi.Concat(Profiller);
+
+    public Profil? Bul(string? ad) => Hepsi.FirstOrDefault(p => p.Ad == ad);
 
     /// <summary>Kopya listeye eklenir. Eğrisi boşsa (hazır profiller) Dengeli eğriyle başlar.</summary>
     public Profil Kopyala(Profil kaynak)
@@ -92,12 +125,14 @@ public sealed class PerformansAyarlari
         if (eski.Ad != yeni.Ad && !AdUygun(yeni.Ad)) throw new ArgumentException("Bu ad kullanılıyor ya da boş", nameof(yeni));
         Profiller[i] = yeni;
         if (TepsiProfili == eski.Ad) TepsiProfili = yeni.Ad;
+        if (SonProfil == eski.Ad) SonProfil = yeni.Ad;
     }
 
     public void Sil(Profil p)
     {
         Profiller.Remove(p);
         if (TepsiProfili == p.Ad) TepsiProfili = null;
+        if (SonProfil == p.Ad) SonProfil = null;
     }
 
     public bool AdUygun(string ad) => !string.IsNullOrWhiteSpace(ad) && !AdAyrilmis(ad) && Profiller.All(p => p.Ad != ad);
