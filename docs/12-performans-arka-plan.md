@@ -133,3 +133,28 @@ Kullanıcı CC'de custom eğriyi değiştirdi (CPU 53°C → %98, GPU 61°C → 
 | `performans/MonsterPerformans.Cekirdek.Tests` | 8 test (gerçek tampon örneği, sensör sınırları, CSV biçimi, gün dönümü) |
 
 Gerçek donanımda 25 sn denendi: DLL, PDH, NVML okunuyor; CSV doğru. Sıradaki: gölge modda birkaç saat (oyun dahil) çalıştırmak.
+
+## 5. Bilinmeyen fan modları (FanSpeedSetting 7.87 statik analiz, 11.11.2026)
+
+Mod değeri `0x79` alt 1 ile yazılır, CC ayrıca sayfa 4 ofset 5'e kaydeder. CC her düğmeyi bir **yetenek bayrağına** bağlıyor; bu makinede okunan değerler (salt okuma):
+
+| Mod | CC adı | Düğme görünür koşulu | Bu makinede | Sonuç |
+|---|---|---|---|---|
+| 0 | Otomatik | her zaman | — | ✅ |
+| 1 | Maksimum | her zaman | — | ✅ |
+| 6 | Özel (custom) | çoğu modelde | — | ✅ |
+| 5 | MaxQ | fan tipi = 5 (sayfa 4 bayt 4 **veya** tampon 13 bayt 14) | ikisi de **2** | ❌ gizli (ölçüm de otomatikle aynıydı) |
+| 2 | Sessiz ("_Silent"/"_AUTOMATIC") | `GetDCHU_Data_Integer(122)` bit 15 | `0x78020053` → **0** | ❌ gizli |
+| 9 | IFSC | güç modu = 3 **ve** sayfa 7 sürüm 0x0100 bayt 21 bit 1 | sayfa 7 tümü 0 | ❌ gizli |
+| 8 | "_Noiseless_mode" açma/kapama (+ sayfa 4 ofset 9 = 1, ofset 5 = 0) | sayfa 7 bayt 20 bit 0 | 0 | ❌ gizli (test edildi: etkisiz) |
+
+- FanSpeedSetting birçok Clevo modeli için ortak; bu modlar başka donanımlar için. **Bu modelde kullanılabilir modlar: 0, 1, 6.**
+- Diğer okunanlar: `Integer(16)=0x93`, `Integer(96)=0x21C`, tampon 13 bayt 12 = 2 (fan sayısı), sayfa 1 ofset 1 = 3 (güç profili). DLL'de tamsayı okuma işlevinin adı `GetDCHU_Data_Integer`.
+- Üçüncü eğri yuvası (Fan3_VGA2) ikinci GPU fanı için; bu modelde yok.
+
+## 6. Kapı E: GPU yükü (otomatik mod, yalnız okuma)
+
+`prototip/gpu_yuk` (D3D11 compute, NVIDIA bağdaştırıcısı açıkça seçilir, %95–98 kullanım, ~50 W) + `prototip/testF_gpu_yuk.py`, kayıt `kayit/testF_gpu_yuk.log` (90 sn):
+- GPU 56 → 79 °C (nvidia-smi). İki fan ~20. sn'de %35 → %100 → **otomatik mod GPU yükünde düz %35 değil.**
+- EC'nin GPU sıcaklığı (tampon 12 bayt 17) ~51–52 °C'de kaldı → **dGPU çekirdek sıcaklığı değil**; uygulama GPU sıcaklığını NVML'den okur.
+- İniş yavaş: yük bitince 30+ sn %100, bir dakika sonra %83.

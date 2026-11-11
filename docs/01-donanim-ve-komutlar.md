@@ -56,7 +56,7 @@ BIOS / EC
 | 104 | 0x68 | `fan1 \| fan2<<8` (0–255 her biri) | **Sabit fan hızı**, iki fan bağımsız | ✅ %0–100 arası; %0'da fan durur |
 | 105 | 0x69 | `0x0F` (fan başına bir bit) | **Fanları otomatiğe döndür** | ✅ hem sabit hızdan hem Max modundan dönüyor. `0` göndermek etkisiz! **Etkin moda döner:** custom'dayken `0x68` sonrası `0x69` → custom eğri (12) |
 | 14 | 0x0E | 256 baytlık tampon (`SetDCHU_Data(14, tampon, 256)`): fan i = 0 CPU, 1 GPU, 2 (3. yuva): `[2+4i..5+4i]` = t₂, round(d₂%×2,55), t₃, round(d₃%×2,55); `[14+6i..19+6i]` = 3 eğim, **büyük endian**; 0–1 = 0 | **Custom fan eğrisini EC'ye yükler** (FanSpeedSetting.exe 7.87, metot 600001C). 1. ve 4. nokta gönderilmez | ✅ 12 kapı A'': tampon 13'te anında görünür, custom modda fan yeni eğriyi izler. EC belleği, NVRAM değil. Dönüş 20 |
-| 121 | 0x79 | `(0x01<<24) \| mod` → mod: 0 otomatik, 1 max, 5 maxQ, 6 custom | Fan modu | ✅ hepsi (12): otomatik ve maxQ düz %35, custom = EC sayfa 4 eğrisini izler (~+%10/sn, −%5/sn); **8** = CC "Turbo fan" düğmesi, tek başına etkisiz görünüyor (12) |
+| 121 | 0x79 | `(0x01<<24) \| mod` → mod: 0 otomatik, 1 max, 5 maxQ, 6 custom | Fan modu | ✅ hepsi (12): otomatik ve maxQ düz %35, custom = EC sayfa 4 eğrisini izler (~+%10/sn, −%5/sn); 2/5/8/9 bu modelde CC'de gizli (yetenek bayrakları kapalı), 8 = "Noiseless" açma/kapama, etkisiz (12 §5) |
 | 121 | 0x79 | `(0x19<<24) \| p` → p: 0 sessiz, 1 tasarruf, 2 performans, 3 eğlence | **Güç profili** (güç sınırı) | ✅ MSR 0x610 ile doğrulandı: **PL1/PL2 = sessiz 15/30 W, tasarruf 30/30, eğlence 45/107, performans 60/135** (bkz. 10) |
 | 121 | 0x79 | `0x18000000`, `0x1E000000`, `0x22000001` | LedKeyboardSetting kullanıyor, anlamı bilinmiyor | ❓ |
 
