@@ -82,7 +82,7 @@ public class ProfilDeposuTestleri : IDisposable
         var s = new ProfilUygulayici(d, p, new FanKontrol(d, TimeSpan.Zero)).GuvenliDurum();
 
         Assert.Equal([AdimDurumu.Yazildi, AdimDurumu.Yazildi, AdimDurumu.Dogrulandi], s.Select(a => a.Durum));
-        Assert.Equal([(0x79, 0x0100_0000L), (0x69, 0x0FL), (0x79, 0x1900_0003L)], d.Yazilanlar);
+        Assert.Equal([(0x79, 0x1900_0000L), (0x79, 0x0100_0000L), (0x69, 0x0FL), (0x79, 0x1900_0003L)], d.Yazilanlar);
         Assert.Equal(WindowsGucPlani.Dengeli, p.Etkin);
     }
 
@@ -92,5 +92,42 @@ public class ProfilDeposuTestleri : IDisposable
         var l = WindowsGucPlani.Planlar();
         Assert.Contains(l, x => x.Guid == WindowsGucPlani.Dengeli);
         Assert.DoesNotContain(l, x => x.Ad.StartsWith(WindowsGucPlani.KopyaOnEki));
+    }
+
+    [Fact]
+    public void Eski_dosya_yeni_ayarlari_varsayilanla_acar()
+    {
+        File.WriteAllText(_yol, """{"Profiller":[],"TepsiProfili":null}""");
+        var a = PerformansAyarlari.Oku(_yol);
+        Assert.Equal(92, a.AcilEsik);
+        Assert.False(a.YenidenUygula);
+        Assert.True(a.KayitTut);
+        Assert.Equal(DogrulamaPolitikasi.FanOtomatik, a.DogrulamaHatasi);
+        Assert.Equal(PerformansAyarlari.VarsayilanKayitKlasoru, a.Kayit);
+    }
+
+    [Fact]
+    public void Yeni_ayarlar_sinirlanir_ve_gecersiz_son_profil_silinir()
+    {
+        File.WriteAllText(_yol, """{"AcilEsik":80,"SonProfil":"Yok","DogrulamaHatasi":7}""");
+        var a = PerformansAyarlari.Oku(_yol);
+        Assert.Equal(92, a.AcilEsik);
+        Assert.Null(a.SonProfil);
+        Assert.Equal(DogrulamaPolitikasi.FanOtomatik, a.DogrulamaHatasi);
+    }
+
+    [Fact]
+    public void Son_profil_ad_degisince_tasinir_silinince_bosalir()
+    {
+        var a = new PerformansAyarlari();
+        var k = a.Kopyala(HazirProfiller.Dengeli);
+        a.SonProfil = k.Ad;
+        var y = k with { Ad = "Yeni" };
+        a.Degistir(k, y);
+        Assert.Equal("Yeni", a.SonProfil);
+        Assert.Same(y, a.Bul("Yeni"));
+        a.Sil(y);
+        Assert.Null(a.SonProfil);
+        Assert.Same(HazirProfiller.Sessiz, a.Bul("Sessiz"));
     }
 }

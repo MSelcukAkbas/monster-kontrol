@@ -86,7 +86,7 @@ public sealed class FanKontrol(IDchu dchu, TimeSpan? dogrulamaAraligi = null)
         b[4 + 4 * i] = (byte)e.T3; b[5 + 4 * i] = FanEgrisi.Duty(e.D3);
         int[] egim =
         [
-            FanEgrisi.Egim(FanEgrisi.T1, FanEgrisi.D1, e.T2, e.D2),
+            Math.Max(0, FanEgrisi.Egim(FanEgrisi.T1, FanEgrisi.D1, e.T2, e.D2)), // d2 < %35: eksi eğim ushort'ta taşar; 0 canlıda çalıştı
             FanEgrisi.Egim(e.T2, e.D2, e.T3, e.D3),
             FanEgrisi.Egim(e.T3, e.D3, FanEgrisi.T4, FanEgrisi.D4),
         ];

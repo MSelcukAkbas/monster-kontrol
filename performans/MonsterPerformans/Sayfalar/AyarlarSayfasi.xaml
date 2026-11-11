@@ -33,8 +33,20 @@
                                      AutomationProperties.Name="Windows ile başlat" />
                     <StackPanel>
                         <TextBlock Text="Windows ile başlat" FontSize="14" />
-                        <TextBlock Text="Oturum açılınca tepside başlar. Açılışta donanıma bir şey yazmaz; profil seçilene kadar fanlar donanımın otomatiğinde kalır."
+                        <TextBlock Text="Oturum açılınca tepside başlar."
                                    Style="{StaticResource Aciklama}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource Satir}">
+                <DockPanel>
+                    <ui:ToggleSwitch x:Name="Yeniden" DockPanel.Dock="Right" Checked="Ayar_Degisti" Unchecked="Ayar_Degisti"
+                                     AutomationProperties.Name="Son profili yeniden uygula" />
+                    <StackPanel>
+                        <TextBlock Text="Açılışta ve uykudan dönüşte son profili yeniden uygula" FontSize="14" />
+                        <TextBlock Style="{StaticResource Aciklama}"
+                                   Text="Özel fan eğrisi yeniden başlatmada sıfırlanır. Açıksa son seçilen profil 3 sn sonra yeniden yazılır; kapalıysa açılışta donanıma bir şey yazılmaz." />
+                        <TextBlock x:Name="SonProfilYazisi" Style="{StaticResource Aciklama}" />
                     </StackPanel>
                 </DockPanel>
             </Border>
@@ -52,10 +64,58 @@
                 </DockPanel>
             </Border>
             <Border Style="{StaticResource Satir}">
+                <DockPanel>
+                    <ComboBox x:Name="Esik" DockPanel.Dock="Right" Width="110" VerticalAlignment="Center" SelectionChanged="Ayar_Degisti"
+                              AutomationProperties.Name="Acil durum eşiği" />
+                    <StackPanel>
+                        <TextBlock Text="Acil durum eşiği" FontSize="14" />
+                        <TextBlock Style="{StaticResource Aciklama}"
+                                   Text="CPU bu sıcaklıkta 3 sn kalırsa (ya da GPU 87°C'yi bulursa) önce frekans kısılır, 30 sn sonra hâlâ sıcaksa fanlar en yükseğe, sonra güç Sessiz'e iner. 85°C altında 60 sn kalınca profil geri gelir. Normal yükte CPU 90–91°C'de dengelenir; bu yüzden 92'nin altı seçilemez." />
+                        <TextBlock x:Name="AcilYazisi" Style="{StaticResource Aciklama}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource Satir}">
+                <DockPanel>
+                    <ComboBox x:Name="Politika" DockPanel.Dock="Right" Width="230" VerticalAlignment="Center" SelectionChanged="Ayar_Degisti"
+                              AutomationProperties.Name="Eğri doğrulanamazsa">
+                        <ComboBoxItem Content="Yalnız fan otomatiğe dönsün" />
+                        <ComboBoxItem Content="Her şey güvenli duruma dönsün" />
+                    </ComboBox>
+                    <StackPanel>
+                        <TextBlock Text="Fan eğrisi doğrulanamazsa" FontSize="14" />
+                        <TextBlock Style="{StaticResource Aciklama}"
+                                   Text="Eğri bir kez daha denenir. Yine geri okunamazsa fan her durumda otomatiğe döner; ikinci seçenek güç seviyesini ve Windows planını da güvenli duruma alır." />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource Satir}">
                 <StackPanel>
                     <TextBlock Text="Çıkışta fan" FontSize="14" />
                     <TextBlock Style="{StaticResource Aciklama}"
                                Text="Bu oturumda fan Maksimum ya da Özel eğriye alındıysa, uygulamadan çıkarken otomatiğe döner (izleyen kalmaz)." />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="Kayıt" Style="{StaticResource Bolum}" />
+            <Border Style="{StaticResource Satir}">
+                <StackPanel>
+                    <DockPanel>
+                        <ui:ToggleSwitch x:Name="Kayit" DockPanel.Dock="Right" Checked="Ayar_Degisti" Unchecked="Ayar_Degisti"
+                                         AutomationProperties.Name="Ölçüm kaydı tut" />
+                        <StackPanel>
+                            <TextBlock Text="Ölçüm kaydı tut" FontSize="14" />
+                            <TextBlock Style="{StaticResource Aciklama}"
+                                       Text="Saniyede bir satır, günde bir CSV (yaklaşık 40 MB): sensörler, Windows güç ayarları ve ön plandaki programın adı (pencere başlığı tutulmaz). 30 günden eskiler ozet klasörüne dakikalık özet olarak iner; özetler silinmez. Profil, acil durum ve doğrulama olayları olaylar.log'a yazılır." />
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <ui:Button DockPanel.Dock="Right" Content="Değiştir" Margin="8,0,0,0" Click="KlasorDegistir_Click" />
+                        <ui:Button DockPanel.Dock="Right" Content="Klasörü aç" Margin="8,0,0,0" Icon="{ui:SymbolIcon FolderOpen24}"
+                                   Click="KlasorAc_Click" />
+                        <TextBlock x:Name="KlasorYazisi" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12"
+                                   TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </DockPanel>
                 </StackPanel>
             </Border>
 

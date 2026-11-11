@@ -84,6 +84,21 @@
                                    Click="Uygula_Click" Margin="0,0,14,0" />
                         <TextBlock x:Name="Sonuc" Style="{StaticResource Ayrinti}" TextWrapping="Wrap" VerticalAlignment="Center" />
                     </DockPanel>
+
+                    <Separator Margin="0,16,0,12" />
+                    <DockPanel>
+                        <ComboBox x:Name="Sure" Width="100" Margin="0,0,8,0" SelectedIndex="0" AutomationProperties.Name="Ölçüm süresi">
+                            <ComboBoxItem Content="30 sn" Tag="30" />
+                            <ComboBoxItem Content="60 sn" Tag="60" />
+                            <ComboBoxItem Content="3 dk" Tag="180" />
+                        </ComboBox>
+                        <ui:Button x:Name="OlcumDugmesi" Content="Ölçüm yap" Icon="{ui:SymbolIcon Gauge24}" Click="Olcum_Click" Margin="0,0,14,0" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Name="OlcumDurumu" Style="{StaticResource Ayrinti}" TextWrapping="Wrap"
+                                       Text="Profili geçici uygular, CPU ve GPU'yu birlikte yükler, sonra önceki duruma döner. CPU 95°C'de durur." />
+                            <TextBlock x:Name="OlcumKiyas" Style="{StaticResource Ayrinti}" TextWrapping="Wrap" Visibility="Collapsed" />
+                        </StackPanel>
+                    </DockPanel>
                 </StackPanel>
             </Border>
         </Grid>

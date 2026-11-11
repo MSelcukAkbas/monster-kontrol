@@ -8,14 +8,38 @@ namespace MonsterPerformans.Cekirdek.Sensorler;
 /// </summary>
 public sealed class PdhSayaclari : IDisposable
 {
-    public static readonly string[] Adlar =
+    /// <summary>İlk 6'nın sırası sabit (Olcum ve CSV sütunları buna dayanır); Sutun yalnız 6. ve sonrası için kullanılır.</summary>
+    public static readonly (string Yol, string Sutun)[] Sayaclar =
     [
-        @"\Processor Information(_Total)\% Processor Time",        // yük
-        @"\Processor Information(_Total)\% Processor Performance", // taban frekansa göre %, turboda > 100
-        @"\Processor Information(_Total)\Processor Frequency",     // taban (nominal) MHz — gerçek değil
-        @"\Processor Information(_Total)\Performance Limit Flags",
-        @"\Processor Information(_Total)\% Performance Limit",
-        @"\System\Processor Queue Length",
+        (@"\Processor Information(_Total)\% Processor Time", "yuk"),
+        (@"\Processor Information(_Total)\% Processor Performance", "perf"), // taban frekansa göre %, turboda > 100
+        (@"\Processor Information(_Total)\Processor Frequency", "taban_mhz"), // taban (nominal) MHz — gerçek değil
+        (@"\Processor Information(_Total)\Performance Limit Flags", "sinir_bayrak"),
+        (@"\Processor Information(_Total)\% Performance Limit", "sinir_yuzde"),
+        (@"\System\Processor Queue Length", "kuyruk"),
+        (@"\Processor Information(_Total)\% Processor Utility", "utility"),
+        (@"\Processor Information(_Total)\% Privileged Time", "ayricalikli"),
+        (@"\Processor Information(_Total)\% Interrupt Time", "kesme_yuzde"),
+        (@"\Processor Information(_Total)\% DPC Time", "dpc"),
+        (@"\Processor Information(_Total)\Interrupts/sec", "kesme_sn"),
+        (@"\Processor Information(_Total)\% C1 Time", "cdurum_c1"),
+        (@"\Processor Information(_Total)\% C2 Time", "cdurum_c2"),
+        (@"\Processor Information(_Total)\% C3 Time", "cdurum_c3"),
+        (@"\System\Context Switches/sec", "baglam_gecis_sn"),
+        (@"\System\System Calls/sec", "sistem_cagri_sn"),
+        (@"\System\Processes", "surec"),
+        (@"\System\Threads", "is_parcacigi"),
+        (@"\Memory\Available MBytes", "bos_bellek_mb"),
+        (@"\Memory\% Committed Bytes In Use", "taahhut_yuzde"),
+        (@"\Memory\Pages/sec", "sayfa_sn"),
+        (@"\PhysicalDisk(_Total)\% Disk Time", "disk_yuzde"),
+        (@"\PhysicalDisk(_Total)\Disk Bytes/sec", "disk_bayt_sn"),
+        // Joker (*) tek değer döndürdüğü için her mantıksal çekirdek ayrı eklenir
+        .. Enumerable.Range(0, Environment.ProcessorCount).SelectMany(i => new[]
+        {
+            ($@"\Processor Information(0,{i})\Actual Frequency", $"cek{i}_mhz"),
+            ($@"\Processor Information(0,{i})\% Processor Time", $"cek{i}_yuk"),
+        }),
     ];
 
     readonly IntPtr _sorgu;
@@ -24,11 +48,11 @@ public sealed class PdhSayaclari : IDisposable
     public PdhSayaclari()
     {
         Kontrol(PdhOpenQueryW(null, IntPtr.Zero, out _sorgu), "PdhOpenQuery");
-        _sayaclar = Adlar.Select(ad => PdhAddEnglishCounterW(_sorgu, ad, IntPtr.Zero, out var s) == 0 ? s : IntPtr.Zero).ToArray();
+        _sayaclar = Sayaclar.Select(a => PdhAddEnglishCounterW(_sorgu, a.Yol, IntPtr.Zero, out var s) == 0 ? s : IntPtr.Zero).ToArray();
         PdhCollectQueryData(_sorgu); // oran sayaçları iki örnek ister; ilk Oku() anlamlı olsun
     }
 
-    /// <summary>Adlar sırasıyla değerler.</summary>
+    /// <summary>Sayaclar sırasıyla değerler.</summary>
     public double?[] Oku()
     {
         PdhCollectQueryData(_sorgu);

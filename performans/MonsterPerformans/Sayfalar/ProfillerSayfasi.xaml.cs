@@ -108,8 +108,11 @@ public partial class ProfillerSayfasi : UserControl
         EgriDugmesi.Visibility = p.Fan == FanModu.Ozel ? Visibility.Visible : Visibility.Collapsed;
         Tepside.IsChecked = App.Ayarlar.TepsiProfili == p.Ad;
 
-        UygulaDugmesi.IsEnabled = App.DonanimVar && !App.Uygulaniyor;
+        UygulaDugmesi.IsEnabled = App.DonanimVar && !App.Mesgul;
         UygulaDugmesi.Content = App.Uygulaniyor ? "Uygulanıyor…" : "Uygula";
+        OlcumDugmesi.IsEnabled = _olcumIptal is not null || App.DonanimVar && !App.Mesgul;
+        OlcumDugmesi.Content = _olcumIptal is not null ? "İptal" : "Ölçüm yap";
+        Sure.IsEnabled = _olcumIptal is null;
         Sonuc.Text = App.SonIslem ?? "";
         _yukleniyor = false;
     }
@@ -207,6 +210,25 @@ public partial class ProfillerSayfasi : UserControl
     async void Uygula_Click(object sender, RoutedEventArgs e)
     {
         if (Secili is { } p) await App.Uygula(p);
+    }
+
+    CancellationTokenSource? _olcumIptal;
+
+    async void Olcum_Click(object sender, RoutedEventArgs e)
+    {
+        if (_olcumIptal is not null) { _olcumIptal.Cancel(); return; }
+        if (Secili is not { } p) return;
+        var saniye = int.Parse((string)((ComboBoxItem)Sure.SelectedItem).Tag);
+        OlcumKiyas.Visibility = Visibility.Collapsed;
+        using (_olcumIptal = new CancellationTokenSource())
+        {
+            var (s, kiyas) = await App.OlcumYap(p, saniye, t => OlcumDurumu.Text = t, _olcumIptal.Token);
+            OlcumDurumu.Text = s is null ? "Ölçüm alınamadı (geçerli CPU okuması yok)." : $"{p.Ad} · {s.Satir()}";
+            OlcumKiyas.Text = kiyas ?? "";
+            OlcumKiyas.Visibility = kiyas is null ? Visibility.Collapsed : Visibility.Visible;
+        }
+        _olcumIptal = null;
+        Yenile();
     }
 
     void Egri_Click(object sender, RoutedEventArgs e)

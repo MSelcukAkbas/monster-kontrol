@@ -9,10 +9,13 @@ public readonly record struct FanEgrisi(int T2, int D2, int T3, int D3)
     // Eğim hesabında CC'nin kullandığı uç noktalar (sayfa 4 kaydı; GPU için de 100°C)
     public const int T1 = 40, D1 = 35, T4 = 100, D4 = 100;
 
+    /// <summary>Özel modda en düşük fan %. %5'te GPU fanı duruyor, CPU fanı takılıyor; %10 kararlı (docs/01, 11.11 merdiveni).</summary>
+    public const int EnAz = 10;
+
     /// <summary>Geçersizse nedenini verir. <paramref name="t4Canli"/> = EC'deki 4. noktanın sıcaklığı (tampon 13).</summary>
     public string? Hata(int t4Canli) =>
         !(T1 < T2 && T2 < T3 && T3 < t4Canli) ? $"Sıcaklıklar {T1} < t2 < t3 < {t4Canli} olmalı (t2={T2}, t3={T3})"
-        : !(D1 <= D2 && D2 <= D3 && D3 <= D4) ? $"Fan %: {D1} ≤ d2 ≤ d3 ≤ {D4} olmalı (d2={D2}, d3={D3})"
+        : !(EnAz <= D2 && D2 <= D3 && D3 <= D4) ? $"Fan %: {EnAz} ≤ d2 ≤ d3 ≤ {D4} olmalı (d2={D2}, d3={D3})"
         : null;
 
     /// <summary>Fan % → EC duty (0–255), yarım yukarı yuvarlanır.</summary>

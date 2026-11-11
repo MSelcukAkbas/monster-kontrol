@@ -29,6 +29,20 @@ public class FanTestleri
     }
 
     [Fact]
+    public void Yuzde35_altinda_ilk_egim_sifir_digerleri_dolu()
+    {
+        var e = new FanEgrisi(41, 10, 80, 40);
+        Assert.Null(e.Hata(100));
+        var b = FanKontrol.Komut14(e, e);
+        Assert.Equal(26, b[3]); // %10 duty
+        foreach (var o in new[] { 14, 20 }) // CPU, GPU
+        {
+            Assert.Equal(0, b[o] | b[o + 1]);
+            Assert.NotEqual(0, b[o + 2] | b[o + 3]);
+        }
+    }
+
+    [Fact]
     public void Tampon13_cozulur_ve_dogrulanir()
     {
         Assert.True(FanKontrol.Dogrula(T13(), Cpu, Gpu));
@@ -53,7 +67,7 @@ public class FanTestleri
     [InlineData(40, 50, 80, 60, 100)] // t2 = t1
     [InlineData(60, 50, 60, 60, 100)] // t2 = t3
     [InlineData(60, 50, 99, 60, 99)]  // t3 GPU'nun canlı 4. noktasına eşit
-    [InlineData(60, 34, 80, 60, 100)] // taban %35'in altında
+    [InlineData(60, 9, 80, 60, 100)]  // %10'un altı: fan durur
     [InlineData(60, 70, 80, 60, 100)] // fan % azalıyor
     [InlineData(60, 50, 80, 101, 100)]
     public void Gecersiz_egri_reddedilir(int t2, int d2, int t3, int d3, int t4) =>

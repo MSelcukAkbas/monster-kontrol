@@ -100,7 +100,7 @@ public partial class FanSayfasi : UserControl
     {
         var profilVar = Profil is not null;
         KaydetDugmesi.IsEnabled = profilVar;
-        UygulaDugmesi.IsEnabled = profilVar && App.DonanimVar && !App.Uygulaniyor;
+        UygulaDugmesi.IsEnabled = profilVar && App.DonanimVar && !App.Mesgul;
         UygulaDugmesi.Content = App.Uygulaniyor ? "Uygulanıyor…" : "Kaydet ve uygula";
     }
 

@@ -38,6 +38,7 @@ Uygulandı (K0–K4): ışık sayfası (aç/kapa, parlaklık, renk), efekt galer
 Diğer firmware modları (MaxQ, Sessiz, IFSC, Noiseless) bu modelde desteklenmiyor ([12](12-performans-arka-plan.md) §5) → listede yok.
 
 **"Ölçüm yap" düğmesi (profil sayfasında):** profili geçici uygular, CPU + GPU'yu birlikte yükler (30 sn / 60 sn / 3 dk seçilir). Sıcaklık, güç, frekans ve fan değerlerini (GPU sütunları dahil) kaydeder. CPU 95°C'de durur. Bitince eski duruma döner. Sonucu saklar ve geçmiş ölçümlerle kıyaslayan tek satırlık özet gösterir.
+*Uygulandı (p1):* yük `Cekirdek/Yuk.cs` (her çekirdekte düşük öncelikli iş parçacığı + NVIDIA'da D3D11 compute; NVIDIA yoksa yalnız CPU). Acil durum başlarsa da keser. Sonuçlar `%AppData%\MonsterPerformans\olcumler.json` (son 200); kıyas aynı profil + süre + yük türündeki son tam ölçümle. Ölçüm sürerken profil düğmeleri gri, "Ölçüm yap" düğmesi "İptal" olur.
 
 ### Sayfalar (sol gezinti çubuğu)
 
@@ -64,7 +65,7 @@ Diğer firmware modları (MaxQ, Sessiz, IFSC, Noiseless) bu modelde desteklenmiy
 
 - EC eğrisi 4 noktalı. **1. nokta (40°C %35) ve 4. nokta (%100; CPU 100°C, GPU 99°C) sabit**; yalnız 2. ve 3. nokta sürüklenir.
 - Kurallar: t2 < t3, fan % azalmaz. Yanında komut 14 baytları ve eğimler görünür.
-- **Hazır eğriler:** Sessiz / Dengeli / Serin. Seçince noktalar yerleşir, sonra elle ince ayar. Sessiz eğri boşta otomatikten sessiz olamaz (taban %35 sabit); fanın geç ve yavaş yükselmesini sağlar.
+- **Hazır eğriler:** Sessiz / Dengeli / Serin. Seçince noktalar yerleşir, sonra elle ince ayar. Otomatik modda taban %35 EC'de sabit; özel eğri %35'in altına iner (en az **%10**, %5'te fan duruyor). Sessiz (41°C %10 → 80°C %40) ve Dengeli (41°C %10 → 80°C %80) eğrileri %10'dan başlar; **Sessiz ve Dengeli hazır profilleri bu eğrileri kullanır** (fan modu Özel), Performans Maksimum. Çıkışta fan otomatiğe güç Sessiz üzerinden döner, sonra profilin gücü geri yazılır (Eğlence'de fırlamasın).
 - "Uygula" düğmesi + durum satırı: tampon 13 geri okunur, "eğri doğrulandı" ya da hata.
 - Koruma bandı ≥ 92°C (kırmızı, düzenlenemez).
 - Kilitli profilde eğri yalnız görüntülenir.
@@ -78,11 +79,11 @@ Diğer firmware modları (MaxQ, Sessiz, IFSC, Noiseless) bu modelde desteklenmiy
 #### 4. Ayarlar
 
 - Windows ile başlat.
-- Açılışta ve uykudan dönüşte profili yeniden uygula (kapı B: özel eğri yeniden başlatmada sıfırlanıyor).
+- Açılışta ve uykudan dönüşte profili yeniden uygula (kapı B: özel eğri yeniden başlatmada sıfırlanıyor). *Uygulandı:* varsayılan kapalı; açıksa `ayarlar.json` → `SonProfil` 3 sn sonra yazılır. Güvenli duruma dönünce `SonProfil` silinir; ölçüm `SonProfil`'i değiştirmez.
 - Acil eşik: 92°C kilitli varsayılan, en fazla 95.
-- Eğri doğrulaması başarısız olursa ne yapılacağı.
+- Eğri doğrulaması başarısız olursa ne yapılacağı. *Uygulandı:* eğri her durumda bir kez daha denenir; sonra "yalnız fan otomatiğe" (varsayılan) ya da "her şey güvenli duruma". "Yok say" seçeneği yok.
 - "Güvenli duruma dön" düğmesi (fan mod 0 + `0x69`, profil eğlence, Dengeli plan).
-- Günlük klasörü.
+- Günlük klasörü. *Uygulandı:* varsayılan `%LocalAppData%\MonsterPerformans\Gunluk` (gölge kaydedicinin `kayit` klasöründen ayrı); günlük CSV, 71 sütun + ham tampon (~36 MB/gün): DCHU, 23 PDH sayacı + çekirdek başına MHz/yük, NVML (bellek, P durumu, kısma nedeni, VRAM), bağlam (ön plan program adı — başlık yok —, tam ekran durumu, priz/pil, boşta sn, plan adı, frekans sınırı, turbo, EPP) ve uygulama durumu (profil, fan, acil kademe, ölçüm). Sütunlar değişirse aynı gün `yyyy-MM-dd_HHmmss.csv` açılır. 30 günden eskiler `ozet\` altına dakikalık özete iner (sayı → ortalama, metin → en sık değer; silinmez), sonra silinir; `olaylar.log` profil/acil/doğrulama olayları. Kayıt kapatılabilir, klasör değiştirilebilir.
 
 ### Tepsi
 
