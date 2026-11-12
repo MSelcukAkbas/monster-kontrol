@@ -126,7 +126,7 @@ public sealed class EfektMotoru : IDisposable
                 _sonKare = null; // uyarı bitti: önceki durum / efekt koşulsuz geri yazılır
                 if (!Calisiyor) { _gonder(_temel); return; }
             }
-            _faz += dt * _ayarlar.Carpan;
+            _faz += dt * _efekt.Carpan(_ayarlar);
             var kare = _efekt.Hesapla(new(_faz, _temel.Renk, _ayarlar.Skala, _sicaklik));
             // Efekt parlaklığı renge katılır, donanım parlaklığı kullanıcınınkinde kalır: karede en çok 1 DLL yazması.
             // Ayrı parlaklık komutu yazma sayısını ikiye katlayıp CPU'yu %1'in üstüne çıkarıyordu (Ateş: %1,4).

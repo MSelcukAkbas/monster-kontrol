@@ -1,4 +1,4 @@
-using MonsterKlavye.Klavye;
+﻿using MonsterKlavye.Klavye;
 
 namespace MonsterKlavye.Tests;
 
@@ -76,6 +76,15 @@ public class EfektTestleri
         Assert.Equal(Hesapla("ates", 3.21), Hesapla("ates", 3.21));
         var kareler = Enumerable.Range(0, 50).Select(i => Hesapla("ates", i * 0.08 + 0.01)).Distinct().Count();
         Assert.True(kareler > 40);
+    }
+
+    [Fact]
+    public void Ates_hiz_ayarini_yok_sayar_kizildan_sariya_kalir()
+    {
+        var ates = Efektler.Hepsi.Single(e => e.Id == "ates");
+        Assert.Equal(1, ates.Carpan(new EfektAyarlari(10, Efektler.Neon)));
+        foreach (var k in Enumerable.Range(0, 600).Select(i => Hesapla("ates", i / 15.0)))
+            Assert.True(k.Renk.R == 255 && k.Renk.B == 0 && k.Renk.G <= 165 && k.Parlaklik is >= 0.3 and <= 1, k.ToString());
     }
 
     [Fact]

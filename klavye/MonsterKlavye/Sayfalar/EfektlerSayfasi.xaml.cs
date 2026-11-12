@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -80,7 +80,7 @@ public partial class EfektlerSayfasi : UserControl
             {
                 Width = 28, Height = 8, CornerRadius = new CornerRadius(4), VerticalAlignment = VerticalAlignment.Center,
                 ToolTip = "Renk skalası ayarlanabilir",
-                Visibility = efekt.SkalaVar ? Visibility.Visible : Visibility.Collapsed,
+                Visibility = efekt.SkalaVar && !efekt.Ayarsiz ? Visibility.Visible : Visibility.Collapsed,
             };
 
             var adSatiri = new DockPanel { Margin = new Thickness(0, 8, 0, 0) };
@@ -190,11 +190,11 @@ public partial class EfektlerSayfasi : UserControl
         SeciliAd.Text = _secili.Ad;
         SeciliAciklama.Text = _secili.Aciklama;
         var hareketli = !ReferenceEquals(_secili, Efektler.Sabit);
-        HizKaydirici.IsEnabled = hareketli;
+        HizKaydirici.IsEnabled = hareketli && !_secili.Ayarsiz;
         if (HizKaydirici.Value != ayar.Hiz) HizKaydirici.Value = ayar.Hiz;
-        HizYazi.Text = !hareketli ? "—" : ayar.Hiz <= 3 ? "Yavaş" : ayar.Hiz <= 6 ? "Orta" : "Hızlı";
+        HizYazi.Text = !hareketli ? "—" : _secili.Ayarsiz ? "Sabit" : ayar.Hiz <= 3 ? "Yavaş" : ayar.Hiz <= 6 ? "Orta" : "Hızlı";
 
-        SkalaPaneli.Visibility = _secili.SkalaVar ? Visibility.Visible : Visibility.Collapsed;
+        SkalaPaneli.Visibility = _secili.SkalaVar && !_secili.Ayarsiz ? Visibility.Visible : Visibility.Collapsed;
         RenkPaneli.Visibility = _secili.SkalaVar ? Visibility.Collapsed : Visibility.Visible;
         Uyari.Visibility = _secili.Uyari ? Visibility.Visible : Visibility.Collapsed;
         SkalaBas.Fill = new SolidColorBrush(Renk(ayar.Skala.Renk(0)));
@@ -247,13 +247,13 @@ public partial class EfektlerSayfasi : UserControl
         foreach (var k in _kartlar.Where(k => k.Canli))
         {
             var ayar = _ayarlar[k.Efekt];
-            k.Faz += dt * ayar.Carpan;
+            k.Faz += dt * k.Efekt.Carpan(ayar);
             OnizlemeCiz(k.Onizleme, k.Efekt, k.Faz, ayar);
         }
         if (!ReferenceEquals(_secili, Efektler.Sabit))
         {
             var ayar = _ayarlar[_secili];
-            _seciliFaz += dt * ayar.Carpan;
+            _seciliFaz += dt * _secili.Carpan(ayar);
             OnizlemeCiz(SeciliOnizleme, _secili, _seciliFaz, ayar);
         }
     }
