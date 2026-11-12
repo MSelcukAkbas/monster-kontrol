@@ -37,6 +37,12 @@ public sealed class FanKontrol(IDchu dchu, TimeSpan? dogrulamaAraligi = null)
     public bool EgriYaz(FanEgrisi cpu, FanEgrisi gpu)
     {
         var t = dchu.TamponOku(EgriTamponu);
+        // EC ara sıra tamamen sıfır tampon döndürüyor (CSV'de 0 satırları): 4. nokta 0 ise yeniden oku
+        for (var i = 0; i < Deneme && t[22] == 0; i++)
+        {
+            Thread.Sleep(_aralik);
+            t = dchu.TamponOku(EgriTamponu);
+        }
         var hata = cpu.Hata(t[22]) is { } c ? "CPU: " + c : gpu.Hata(t[30]) is { } g ? "GPU: " + g : null;
         if (hata is not null)
             throw new ArgumentException(hata);

@@ -163,6 +163,7 @@ public partial class App : Application
                         AcilKontrol(o);
                     });
                     Kaydet(o);
+                    FanDongusu(o);
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
@@ -171,6 +172,41 @@ public partial class App : Application
             } while (await saat.WaitForNextTickAsync(dur));
         }
         catch (OperationCanceledException) { }
+    }
+
+    // true başlar: önceki oturum çöktüyse asılı kalan 0x68 sabit hızı ilk örnekte 0x69 ile temizlenir
+    static bool _yazilimFani = true;
+    static int? _sonGpuC;
+
+    /// <summary>
+    /// Örnekleyici iş parçacığında, 1 Hz. Özel fanlı profilde (acil yokken) fanları EC değil uygulama yönetir: iki eğri
+    /// hesaplanıp 0x68 ile yazılır. EC'nin eğrisine dönüşte (0x69) CPU fanı %95'e fırlayıp 1 puan/sn iniyor, bu yüzden
+    /// 0x69 yalnız koşul bozulunca (acil Maksimum, Özel olmayan profil) ve çıkışta. GPU uykudayken EC GPU fanını durdurur:
+    /// o zaman <see cref="FanEgrisi.UykuHedefi"/>. Çökmede son hız asılı kalır; EC'nin 90°C+ koruması sürer.
+    /// </summary>
+    static void FanDongusu(Olcum o)
+    {
+        // Profil yazılırken karışma; EC'nin sıfır tamponunda son yazılan hız kalsın (0x69 sıçratır)
+        if (_dchu is null || Uygulaniyor || !o.Dchu.Gecerli) return;
+        var p = _temel;
+        try
+        {
+            if (p is { Fan: FanModu.Ozel } && _uygulananKademe == AcilKademe.Yok)
+            {
+                // NVML yükte arada boş döner: uyanıkken son geçerli GPU sıcaklığı, hiç yoksa CPU'nunki
+                int? gpuC = null;
+                if (!GucDurumu.Uyuyor()) gpuC = _sonGpuC = o.Gpu?.C ?? _sonGpuC ?? o.Dchu.CpuC;
+                var h = FanEgrisi.Hedef(p.CpuEgrisi, p.GpuEgrisi, o.Dchu.CpuC, gpuC);
+                _dchu.Yaz(Komutlar.FanHizi, FanEgrisi.Duty(h.Cpu) | (uint)FanEgrisi.Duty(h.Gpu) << 8);
+                _yazilimFani = true;
+            }
+            else if (_yazilimFani)
+            {
+                _dchu.Yaz(Komutlar.FanOtomatik, 0x0F);
+                _yazilimFani = false;
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine($"Fan döngüsü yazamadı: {ex.Message}"); }
     }
 
     /// <summary>

@@ -7,6 +7,23 @@ public class FanTestleri
 {
     static readonly FanEgrisi Cpu = new(53, 98, 80, 99), Gpu = new(61, 79, 80, 80);
 
+    [Theory]
+    [InlineData(30, 15, 25)]  // t2 altı: d2=25 → CPU en az %15
+    [InlineData(69, 15, 36)]  // 50–88 arası doğrusal: 25 + 23×19/38 = 36
+    [InlineData(88, 18, 48)]
+    [InlineData(94, 44, 74)]  // t3 sonrası 100°C/%100'e
+    [InlineData(105, 70, 100)]
+    public void Uyku_hedefi_gpu_egriyi_ustlenir_cpu_30_asagida(int c, int cpu, int gpu) =>
+        Assert.Equal((cpu, gpu), new FanEgrisi(50, 25, 88, 48).UykuHedefi(c));
+
+    [Fact]
+    public void Hedef_uyanikken_iki_egri_uykudayken_uyku_hedefi()
+    {
+        FanEgrisi c = new(50, 25, 88, 48), g = new(50, 50, 85, 80);
+        Assert.Equal((36, 74), FanEgrisi.Hedef(c, g, 69, 78)); // 50 + 30×28/35 = 74
+        Assert.Equal((15, 25), FanEgrisi.Hedef(c, g, 40, null));
+    }
+
     // Gerçek tampon 13 (11.11.2026, CC eğrisi yüklüyken); GPU 4. noktası 99°C
     internal static byte[] T13() => Doldur(
         [0, 0, 0, 0, 200, 0, 0, 200, 0, 0, 200, 0, 2, 0, 2, 6, 40, 89, 53, 250, 80, 252, 100, 255,
@@ -31,10 +48,10 @@ public class FanTestleri
     [Fact]
     public void Yuzde35_altinda_ilk_egim_sifir_digerleri_dolu()
     {
-        var e = new FanEgrisi(41, 10, 80, 40);
+        var e = new FanEgrisi(41, 15, 80, 40);
         Assert.Null(e.Hata(100));
         var b = FanKontrol.Komut14(e, e);
-        Assert.Equal(26, b[3]); // %10 duty
+        Assert.Equal(38, b[3]); // %15 duty
         foreach (var o in new[] { 14, 20 }) // CPU, GPU
         {
             Assert.Equal(0, b[o] | b[o + 1]);
@@ -67,7 +84,7 @@ public class FanTestleri
     [InlineData(40, 50, 80, 60, 100)] // t2 = t1
     [InlineData(60, 50, 60, 60, 100)] // t2 = t3
     [InlineData(60, 50, 99, 60, 99)]  // t3 GPU'nun canlı 4. noktasına eşit
-    [InlineData(60, 9, 80, 60, 100)]  // %10'un altı: fan durur
+    [InlineData(60, 14, 80, 60, 100)]  // %15 altı
     [InlineData(60, 70, 80, 60, 100)] // fan % azalıyor
     [InlineData(60, 50, 80, 101, 100)]
     public void Gecersiz_egri_reddedilir(int t2, int d2, int t3, int d3, int t4) =>

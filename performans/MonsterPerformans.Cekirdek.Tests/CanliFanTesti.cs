@@ -115,7 +115,7 @@ public class CanliFanTesti(ITestOutputHelper cikti)
             for (var s = 0; s < saniye; s++)
             {
                 var d = DchuDurumu.Coz(dchu.TamponOku(Komutlar.DurumTamponu));
-                var g = nvml?.Oku().C;
+                var g = nvml?.Oku()?.C;
                 cikti.WriteLine($"{ad} {s,2} sn: CPU {d.CpuC}°C GPU {g?.ToString() ?? "-"}°C, fan %{d.CpuDuty}/%{d.GpuDuty}, {d.CpuRpm}/{d.GpuRpm} RPM");
                 Assert.True(d.Gecerli && d.CpuC < 92 && (g ?? 0) < 85, $"CPU {d.CpuC}°C / GPU {g}°C: sensör hatası ya da sınır");
                 Thread.Sleep(1000);

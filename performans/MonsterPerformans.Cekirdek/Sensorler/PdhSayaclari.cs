@@ -34,6 +34,9 @@ public sealed class PdhSayaclari : IDisposable
         (@"\Memory\Pages/sec", "sayfa_sn"),
         (@"\PhysicalDisk(_Total)\% Disk Time", "disk_yuzde"),
         (@"\PhysicalDisk(_Total)\Disk Bytes/sec", "disk_bayt_sn"),
+        // Intel RAPL (Windows Enerji Ölçer), miliwatt: paket = işlemcinin toplamı, pp0 = çekirdekler
+        (@"\Energy Meter(rapl_package0_pkg)\Power", "cpu_mW"),
+        (@"\Energy Meter(rapl_package0_pp0)\Power", "cekirdek_mW"),
         // Joker (*) tek değer döndürdüğü için her mantıksal çekirdek ayrı eklenir
         .. Enumerable.Range(0, Environment.ProcessorCount).SelectMany(i => new[]
         {

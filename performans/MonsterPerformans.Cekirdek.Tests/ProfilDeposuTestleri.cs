@@ -21,7 +21,7 @@ public class ProfilDeposuTestleri : IDisposable
         var b = PerformansAyarlari.Oku(_yol);
         Assert.Equal([k], b.Profiller);
         Assert.Equal("Performans kopyası", b.TepsiProfili);
-        Assert.Equal(HazirEgriler.Dengeli, b.Profiller[0].CpuEgrisi); // hazır profilin boş eğrisi doldurulur
+        Assert.Equal(HazirEgriler.Performans, b.Profiller[0].CpuEgrisi); // kopya hazır profilin eğrisini taşır
     }
 
     [Theory]
@@ -46,6 +46,12 @@ public class ProfilDeposuTestleri : IDisposable
         var a = PerformansAyarlari.Oku(_yol);
         var p = Assert.Single(a.Profiller); // hazır adı ve yinelenen ad düşer
         Assert.Equal(100, p.FrekansYuzde);
+        Assert.Equal(default, p.CpuEgrisi); // boş eğri boş kalır
+
+        File.WriteAllText(_yol, """{"Profiller":[{"Ad":"E","Guc":"Sessiz","WindowsPlani":"381b4222-f694-41f0-9685-ff5bb260df2e","FrekansYuzde":50,"Turbo":false,"Fan":"Ozel","CpuEgrisi":{"T2":41,"D2":10,"T3":80,"D3":40},"GpuEgrisi":{"T2":41,"D2":10,"T3":80,"D3":12}}]}""");
+        var e = Assert.Single(PerformansAyarlari.Oku(_yol).Profiller);
+        Assert.Equal(new FanEgrisi(41, 15, 80, 40), e.CpuEgrisi);
+        Assert.Equal(new FanEgrisi(41, 15, 80, 15), e.GpuEgrisi);
         Assert.Null(a.TepsiProfili);
     }
 

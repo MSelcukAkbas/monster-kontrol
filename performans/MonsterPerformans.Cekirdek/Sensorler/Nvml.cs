@@ -29,8 +29,10 @@ public sealed class Nvml : IDisposable
         return null;
     }
 
-    public GpuDurumu Oku()
+    /// <summary>GPU uykudaysa null: NVML çağrısı kartı uyandırır ve uyutmaz (ölçüldü: açıkken %83 D0, kapalıyken hep D3).</summary>
+    public GpuDurumu? Oku()
     {
+        if (GucDurumu.Uyuyor()) return null;
         Kullanim? k = nvmlDeviceGetUtilizationRates(_cihaz, out var kk) == 0 ? kk : null;
         return new(
             nvmlDeviceGetTemperature(_cihaz, 0, out var c) == 0 ? (int)c : null,

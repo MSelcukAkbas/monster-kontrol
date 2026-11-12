@@ -7,12 +7,14 @@ namespace MonsterPerformans.Cekirdek.Guc;
 /// <summary>Kilitli 3 profil. Kodda durur, JSON'a yazılmaz: dosya elle bozulsa da değişmezler.</summary>
 public static class HazirProfiller
 {
-    // Otomatik modun tabanı EC'de %35: Sessiz ve Dengeli %10'a inebilsin diye özel eğri kullanır
-    public static readonly Profil Sessiz = new("Sessiz", GucSeviyesi.Sessiz, WindowsGucPlani.Dengeli, 70, false,
-        FanModu.Ozel, HazirEgriler.Sessiz, HazirEgriler.Sessiz);
-    public static readonly Profil Dengeli = new("Dengeli", GucSeviyesi.Eglence, WindowsGucPlani.Dengeli, 100, true,
-        FanModu.Ozel, HazirEgriler.Dengeli, HazirEgriler.Dengeli);
-    public static readonly Profil Performans = new("Performans", GucSeviyesi.Performans, WindowsGucPlani.Dengeli, 100, true, FanModu.Maksimum);
+    // Frekans % × 4,1 GHz: Sessiz 59 ≈ 2,4 GHz (taban), Dengeli 78 ≈ 3,2 GHz (tam yükte 90°C sınırının altında kalsın), Performans sınırsız.
+    // Eğriler yatık (az fark = az fan değişimi); GPU fanı daha sessiz olduğu için CPU'nunkinden önde.
+    public static readonly Profil Sessiz = new("Sessiz", GucSeviyesi.Sessiz, WindowsGucPlani.Dengeli, 59, false,
+        FanModu.Ozel, HazirEgriler.Sessiz, HazirEgriler.SessizGpu);
+    public static readonly Profil Dengeli = new("Dengeli", GucSeviyesi.Eglence, WindowsGucPlani.Dengeli, 78, true,
+        FanModu.Ozel, HazirEgriler.Dengeli, HazirEgriler.DengeliGpu);
+    public static readonly Profil Performans = new("Performans", GucSeviyesi.Performans, WindowsGucPlani.Dengeli, 100, true,
+        FanModu.Ozel, HazirEgriler.Performans, HazirEgriler.PerformansGpu);
 
     public static IReadOnlyList<Profil> Hepsi { get; } = [Sessiz, Dengeli, Performans];
 
@@ -20,17 +22,20 @@ public static class HazirProfiller
 }
 
 /// <summary>
-/// Fan sayfasındaki hazır eğriler (2. ve 3. nokta). Sessiz ve Dengeli 41°C'de %10'dan başlar: 40°C ile t2 arası
-/// ölçülmedi, t2 hemen 40'ın üstünde tutulunca o bölge 1°C'ye iner.
+/// Hazır eğriler (2. ve 3. nokta). Dalgalanmayı azaltmak için t2–t3 arası yatık; t3'ten sonra EC 100°C/%100'e diker.
 /// </summary>
 public static class HazirEgriler
 {
-    public static readonly FanEgrisi Sessiz = new(41, FanEgrisi.EnAz, 80, 40), Dengeli = new(41, FanEgrisi.EnAz, 80, 80);
+    public static readonly FanEgrisi
+        Sessiz = new(50, 20, 85, 45), SessizGpu = new(50, 25, 85, 55),
+        Dengeli = new(50, 25, 88, 48), DengeliGpu = new(50, 50, 85, 80),
+        Performans = new(50, 40, 88, 75), PerformansGpu = new(50, 50, 85, 90);
 
     public static IReadOnlyList<(string Ad, FanEgrisi Egri)> Hepsi { get; } =
     [
         ("Sessiz", Sessiz),
         ("Dengeli", Dengeli),
+        ("Performans", Performans),
         ("Serin", new(50, 55, 70, 90)),
     ];
 }
@@ -80,7 +85,7 @@ public sealed class PerformansAyarlari
         a.Profiller = (a.Profiller ?? [])
             .Where(p => p is not null && !string.IsNullOrWhiteSpace(p.Ad) && !AdAyrilmis(p.Ad))
             .DistinctBy(p => p.Ad)
-            .Select(p => p with { FrekansYuzde = Math.Clamp(p.FrekansYuzde, 1, 100) })
+            .Select(p => p with { FrekansYuzde = Math.Clamp(p.FrekansYuzde, 1, 100), CpuEgrisi = EnAz(p.CpuEgrisi), GpuEgrisi = EnAz(p.GpuEgrisi) })
             .ToList();
         if (a.Profiller.All(p => p.Ad != a.TepsiProfili)) a.TepsiProfili = null;
         if (a.Bul(a.SonProfil) is null) a.SonProfil = null;
@@ -88,6 +93,10 @@ public sealed class PerformansAyarlari
         if (!Enum.IsDefined(a.DogrulamaHatasi)) a.DogrulamaHatasi = default;
         return a;
     }
+
+    // Eski profillerde %15 altı fan kalmış olabilir (sınır sonradan yükseldi); boş eğri (Otomatik fan) dokunulmaz
+    static FanEgrisi EnAz(FanEgrisi e) => e == default ? e
+        : e with { D2 = Math.Max(e.D2, FanEgrisi.EnAz), D3 = Math.Max(e.D3, FanEgrisi.EnAz) };
 
     /// <summary>Önce geçici dosyaya, sonra yerine taşır: yazarken kapanırsa eski dosya bozulmaz.</summary>
     public void Yaz(string yol)
