@@ -16,7 +16,7 @@
 
         <ui:TitleBar Grid.Row="0" Title="Monster Kontrol">
             <ui:TitleBar.Icon>
-                <ui:SymbolIcon Symbol="Grid24" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                <ui:ImageIcon Source="pack://application:,,,/logo.png" Width="16" Height="16" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 

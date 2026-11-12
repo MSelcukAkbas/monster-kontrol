@@ -1,3 +1,5 @@
+<p align="center"><img src="kontrol/MonsterKontrol/logo.png" width="96" alt="Monster Kontrol logosu"></p>
+
 # Monster Kontrol
 
 Monster ABRA A5 V16.6 (Clevo) dizüstü için üreticinin Control Center uygulamasının yerine geçen tek bir Windows uygulaması: klavye ışığı, fan ve güç denetimi, sistem izleme.
