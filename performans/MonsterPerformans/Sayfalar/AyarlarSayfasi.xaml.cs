@@ -51,6 +51,7 @@ public partial class AyarlarSayfasi : UserControl
         Esik.SelectedIndex = a.AcilEsik - AcilDurum.VarsayilanEsik;
         Politika.SelectedIndex = (int)a.DogrulamaHatasi;
         Kayit.IsChecked = a.KayitTut;
+        EnYuksekMhz.Value = a.EnYuksekMhz;
         _yukleniyor = false;
         SonProfilYazisi.Text = a.SonProfil is { } p ? $"Son profil: {p}" : "Son profil yok (güvenli durumda ya da hiç seçilmedi).";
         AcilYazisi.Text = App.AcilKademe == AcilKademe.Yok ? "" : $"Şu an acil durumda: {AcilDurum.Ad(App.AcilKademe)}.";
@@ -66,6 +67,7 @@ public partial class AyarlarSayfasi : UserControl
         a.AcilEsik = AcilDurum.VarsayilanEsik + Math.Max(0, Esik.SelectedIndex);
         a.DogrulamaHatasi = (DogrulamaPolitikasi)Math.Max(0, Politika.SelectedIndex);
         a.KayitTut = Kayit.IsChecked == true;
+        if (EnYuksekMhz.Value is { } mhz) a.EnYuksekMhz = Math.Clamp((int)Math.Round(mhz), PerformansAyarlari.EnAzMhz, PerformansAyarlari.EnCokMhz);
         App.AyarlarDegisti();
     }
 

@@ -108,6 +108,7 @@ public class ProfilDeposuTestleri : IDisposable
         Assert.Equal(92, a.AcilEsik);
         Assert.False(a.YenidenUygula);
         Assert.True(a.KayitTut);
+        Assert.Equal(4100, a.EnYuksekMhz);
         Assert.Equal(DogrulamaPolitikasi.FanOtomatik, a.DogrulamaHatasi);
         Assert.Equal(PerformansAyarlari.VarsayilanKayitKlasoru, a.Kayit);
     }
@@ -115,9 +116,10 @@ public class ProfilDeposuTestleri : IDisposable
     [Fact]
     public void Yeni_ayarlar_sinirlanir_ve_gecersiz_son_profil_silinir()
     {
-        File.WriteAllText(_yol, """{"AcilEsik":80,"SonProfil":"Yok","DogrulamaHatasi":7}""");
+        File.WriteAllText(_yol, """{"AcilEsik":80,"SonProfil":"Yok","DogrulamaHatasi":7,"EnYuksekMhz":99999}""");
         var a = PerformansAyarlari.Oku(_yol);
         Assert.Equal(92, a.AcilEsik);
+        Assert.Equal(PerformansAyarlari.EnCokMhz, a.EnYuksekMhz);
         Assert.Null(a.SonProfil);
         Assert.Equal(DogrulamaPolitikasi.FanOtomatik, a.DogrulamaHatasi);
     }

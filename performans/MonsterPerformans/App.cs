@@ -430,6 +430,7 @@ public static class App
     static void AyarlariYansit()
     {
         _acil.Esik = Ayarlar.AcilEsik;
+        ProfilUygulayici.EnYuksekMhz = Ayarlar.EnYuksekMhz;
         _kayitKlasoru = Ayarlar.KayitTut ? Ayarlar.Kayit : null;
     }
 

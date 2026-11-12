@@ -61,6 +61,10 @@ public sealed class PerformansAyarlari
 
     public bool KayitTut { get; set; } = true;
 
+    /// <summary>İşlemcinin en yüksek turbo frekansı (MHz); profillerdeki frekans yüzdesi buna göre hesaplanır.</summary>
+    public int EnYuksekMhz { get; set; } = VarsayilanEnYuksekMhz;
+    public const int VarsayilanEnYuksekMhz = 4100, EnAzMhz = 1000, EnCokMhz = 6500;
+
     /// <summary>Boşsa <see cref="VarsayilanKayitKlasoru"/>.</summary>
     public string? KayitKlasoru { get; set; }
 
@@ -89,6 +93,7 @@ public sealed class PerformansAyarlari
             .ToList();
         if (a.Profiller.All(p => p.Ad != a.TepsiProfili)) a.TepsiProfili = null;
         if (a.Bul(a.SonProfil) is null) a.SonProfil = null;
+        a.EnYuksekMhz = Math.Clamp(a.EnYuksekMhz, EnAzMhz, EnCokMhz);
         a.AcilEsik = Math.Clamp(a.AcilEsik, AcilDurum.VarsayilanEsik, AcilDurum.EnYuksekEsik);
         if (!Enum.IsDefined(a.DogrulamaHatasi)) a.DogrulamaHatasi = default;
         return a;

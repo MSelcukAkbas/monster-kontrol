@@ -1,0 +1,41 @@
+# Her push/PR'da derleyip test eder. "v" ile başlayan etiket (ör. v1.0.0) atılınca
+# tek parça MonsterKontrol.exe üretip GitHub Release'e ekler.
+name: Derle ve yayınla
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  derle:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test
+        run: |
+          dotnet test klavye/MonsterKlavye.Tests
+          dotnet test performans/MonsterPerformans.Cekirdek.Tests
+          dotnet test ortak/MonsterKontrol.Dchu.Tests
+
+      - name: Tek parça exe
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: >
+          dotnet publish kontrol/MonsterKontrol/MonsterKontrol.csproj -c Release -r win-x64 --self-contained
+          -p:Platform=x64 -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true -p:DebugType=none -o yayin
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" yayin/MonsterKontrol.exe --title "${{ github.ref_name }}" --generate-notes

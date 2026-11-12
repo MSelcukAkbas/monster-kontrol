@@ -26,8 +26,8 @@ public enum DogrulamaPolitikasi { FanOtomatik, GuvenliDurum }
 /// </summary>
 public sealed class ProfilUygulayici(IDchu dchu, IGucPlani plan, FanKontrol fan)
 {
-    /// <summary>i5-10200H en yüksek turbo (docs/01).</summary>
-    public const int EnYuksekMhz = 4100;
+    /// <summary>İşlemcinin en yüksek turbosu; frekans yüzdesi buna göre hesaplanır. Ayarlardan gelir (varsayılan i5-10200H, docs/01).</summary>
+    public static int EnYuksekMhz { get; set; } = PerformansAyarlari.VarsayilanEnYuksekMhz;
 
     public IReadOnlyList<AdimSonucu> Uygula(Profil p, DogrulamaPolitikasi politika = DogrulamaPolitikasi.FanOtomatik)
     {

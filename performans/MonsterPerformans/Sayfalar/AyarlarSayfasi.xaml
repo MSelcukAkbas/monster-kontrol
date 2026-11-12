@@ -97,6 +97,20 @@
                 </StackPanel>
             </Border>
 
+            <TextBlock Text="İşlemci" Style="{StaticResource Bolum}" />
+            <Border Style="{StaticResource Satir}">
+                <DockPanel>
+                    <ui:NumberBox x:Name="EnYuksekMhz" DockPanel.Dock="Right" Width="150" VerticalAlignment="Center"
+                                  Minimum="1000" Maximum="6500" SmallChange="100" LargeChange="500" MaxDecimalPlaces="0"
+                                  ClearButtonEnabled="False" ValueChanged="Ayar_Degisti" AutomationProperties.Name="En yüksek frekans (MHz)" />
+                    <StackPanel>
+                        <TextBlock Text="En yüksek frekans (MHz)" FontSize="14" />
+                        <TextBlock Style="{StaticResource Aciklama}"
+                                   Text="İşlemcinizin en yüksek turbo frekansı. Profillerdeki frekans yüzdesi bu değere göre MHz'e çevrilir (ör. %80 × 4100 = 3280 MHz). Varsayılan 4100: i5-10200H. Değişiklik profil bir sonraki uygulanışında geçerli olur." />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
             <TextBlock Text="Kayıt" Style="{StaticResource Bolum}" />
             <Border Style="{StaticResource Satir}">
                 <StackPanel>
@@ -140,7 +154,7 @@
                 </DockPanel>
             </Border>
 
-            <TextBlock Text="Monster Performans · Monster Klavye'den bağımsız çalışır" Margin="0,14,0,0"
+            <TextBlock Text="Monster Performans" Margin="0,14,0,0"
                        FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
         </StackPanel>
     </ScrollViewer>
