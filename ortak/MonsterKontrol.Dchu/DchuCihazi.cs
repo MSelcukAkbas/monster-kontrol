@@ -16,6 +16,8 @@ public sealed class DchuCihazi : IDchu, IDisposable
     public const int VeriBoyu = 256;
 
     static int _cozucuKuruldu;
+    // Monster Kontrol'de klavye ve performans ayrı örnek kullanır: iş parçacıkları DLL'e aynı anda girmesin
+    static readonly object DllKilidi = new();
 
     readonly BlockingCollection<Action> _kuyruk = new();
     readonly Thread _isParcacigi;
@@ -77,7 +79,7 @@ public sealed class DchuCihazi : IDchu, IDisposable
     void Dongu()
     {
         foreach (var islem in _kuyruk.GetConsumingEnumerable())
-            islem();
+            lock (DllKilidi) islem();
     }
 
     public void Dispose()

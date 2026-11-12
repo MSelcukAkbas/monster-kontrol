@@ -35,6 +35,12 @@
                             <TextBlock Text="Pano" VerticalAlignment="Center" />
                         </StackPanel>
                     </ListBoxItem>
+                    <ListBoxItem Tag="uygulamalar" AutomationProperties.Name="Uygulamalar">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Apps24" Margin="0,0,12,0" />
+                            <TextBlock Text="Uygulamalar" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ListBoxItem>
                     <ListBoxItem Tag="fan" AutomationProperties.Name="Fan">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="WeatherSqualls24" Margin="0,0,12,0" />

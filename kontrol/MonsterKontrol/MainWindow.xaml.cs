@@ -23,6 +23,7 @@ public partial class MainWindow : FluentWindow, MonsterPerformans.IGezgin
         if (App.PerformansVar)
         {
             _sayfalar["pano"] = new P.PanoSayfasi();
+            _sayfalar["uygulamalar"] = new P.UygulamalarSayfasi();
             _sayfalar["fan"] = new P.FanSayfasi();
             _sayfalar["profiller"] = new P.ProfillerSayfasi();
             _sayfalar["ayarlar"] = new P.AyarlarSayfasi();

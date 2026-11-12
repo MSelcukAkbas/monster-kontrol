@@ -1,0 +1,33 @@
+<UserControl x:Class="MonsterPerformans.Sayfalar.UygulamalarSayfasi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <Grid Margin="28,20,28,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" AutomationProperties.Name="Süre">
+                <ui:Button x:Name="Dk5" Content="5 dk" Tag="300" Click="Pencere_Click" Margin="0,0,6,0" />
+                <ui:Button x:Name="Dk30" Content="30 dk" Tag="1800" Click="Pencere_Click" Appearance="Primary" />
+            </StackPanel>
+            <TextBlock Text="Uygulamalar" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,24,4" />
+        </DockPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource Kart}" AutomationProperties.Name="En çok kullanan uygulamalar">
+            <!-- Başlık kaymaz; iki ızgaranın sağında kaydırma çubuğu için aynı boşluk, sütunlar hizalı kalsın -->
+            <DockPanel>
+                <Grid x:Name="Baslik" DockPanel.Dock="Top" Margin="0,0,20,4" />
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid x:Name="Tablo" Margin="0,0,20,0" />
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <TextBlock x:Name="Bilgi" Grid.Row="2" Margin="2,12,0,0" Style="{StaticResource Ayrinti}" TextWrapping="Wrap"
+                   Text="CPU ya da GPU'su %1 ve üstü olan uygulamalar; aynı programın süreçleri toplanır. Şimdi: son 5 sn; ort.: seçili pencere boyunca ortalama; enerji işlemci gücünden CPU payına göre tahmin." />
+    </Grid>
+</UserControl>

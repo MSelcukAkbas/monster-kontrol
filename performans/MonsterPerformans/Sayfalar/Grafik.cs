@@ -43,7 +43,7 @@ public sealed class Grafik : FrameworkElement
         var vurgu = TryFindResource("AccentFillColorDefaultBrush") as Brush ?? Brushes.DeepSkyBlue;
         Ciz(dc, o => o.Dchu.Gecerli ? o.Dchu.CpuC : null, new Pen(vurgu, 2));
         Ciz(dc, o => o.Gpu?.C, new Pen(GpuRengi, 2));
-        Ciz(dc, o => o.Dchu.CpuDuty, new Pen(FanRengi, 1.5) { DashStyle = DashStyles.Dash });
+        Ciz(dc, o => o.Dchu.Gecerli ? o.Dchu.CpuDuty : null, new Pen(FanRengi, 1.5) { DashStyle = DashStyles.Dash });
 
         double Y(double deger) => 4 + (y - 8) * (1 - Math.Clamp(deger, 0, 100) / 100);
 

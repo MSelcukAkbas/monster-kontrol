@@ -7,6 +7,7 @@ namespace MonsterPerformans;
 public partial class MainWindow : FluentWindow, IGezgin
 {
     readonly PanoSayfasi _pano = new();
+    readonly UygulamalarSayfasi _uygulamalar = new();
     readonly FanSayfasi _fan = new();
     readonly ProfillerSayfasi _profiller = new();
     readonly AyarlarSayfasi _ayarlar = new();
@@ -48,6 +49,7 @@ public partial class MainWindow : FluentWindow, IGezgin
         if (Icerik is null) return; // InitializeComponent sırasında
         Icerik.Content = secili.Tag switch
         {
+            "uygulamalar" => _uygulamalar,
             "fan" => _fan,
             "profiller" => _profiller,
             "ayarlar" => _ayarlar,

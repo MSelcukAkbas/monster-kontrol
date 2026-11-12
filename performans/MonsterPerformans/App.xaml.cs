@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -69,6 +69,9 @@ public partial class App : Application
     const int KayitGun = 30;
     static volatile string? _kayitKlasoru; // null: kayıt kapalı. Örnekleyici iş parçacığı okur
     static CsvKayitci? _csv; // yalnız örnekleyici iş parçacığında
+    static SurecKayitci? _surecler; // kayıt kapalıyken de ölçer (Pano özeti)
+    public static Gecmis<IReadOnlyList<SurecPayi>> SurecGecmisi { get; } = new(1800);
+    static readonly int CpuMWSirasi = Array.FindIndex(PdhSayaclari.Sayaclar, s => s.Sutun == "cpu_mW");
     static string? _csvKlasoru;
     static DateOnly _temizlik;
 
@@ -123,6 +126,14 @@ public partial class App : Application
         NvmlVar = _nvml is not null;
         Ayarlar = PerformansAyarlari.Oku(PerformansAyarlari.VarsayilanYol);
         AyarlariYansit();
+        // Önceki oturumun son 30 dk'sı: grafik ve Uygulamalar sayfası yeniden açılışta boş kalmasın (örnekleme başlamadan)
+        if (_kayitKlasoru is { } gecmisKlasoru)
+            try
+            {
+                foreach (var o in GecmisYukleyici.Olcumler(gecmisKlasoru, DateTime.Now, 1800)) Gecmis.Ekle(o);
+                foreach (var p in GecmisYukleyici.Surecler(gecmisKlasoru, DateTime.Now, 1800)) SurecGecmisi.Ekle(p);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Debug.WriteLine($"Geçmiş okunamadı: {ex.Message}"); }
 
         // Açılışta yalnız okuma; yeniden uygulama ayarı açıksa son profil 3 sn sonra yazılır
         if (_dchu is not null)
@@ -379,12 +390,24 @@ public partial class App : Application
             _csv = klasor is null ? null : new CsvKayitci(klasor);
             _csvKlasoru = klasor;
         }
+        try
+        {
+            _surecler ??= new SurecKayitci();
+            _surecler.Klasor = klasor;
+            var paylar = _surecler.Yaz(o.Zaman, CpuMWSirasi < o.Pdh.Length ? o.Pdh[CpuMWSirasi] : null);
+            _ = _arayuz.BeginInvoke(() => SurecGecmisi.Ekle(paylar));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            Debug.WriteLine($"Süreç örneği alınamadı: {ex.Message}"); // ana CSV etkilenmesin
+        }
         if (_csv is null) return;
         var bugun = DateOnly.FromDateTime(o.Zaman);
         if (bugun != _temizlik)
         {
             _temizlik = bugun;
             CsvKayitci.Temizle(klasor!, KayitGun, bugun);
+            SurecKayitci.Temizle(klasor!, KayitGun, bugun);
         }
         _csv.Yaz(o, new UygulamaDurumu(EtkinProfil, _temel?.Fan.ToString(), _uygulananKademe.ToString(), OlcumSuruyor));
     }
@@ -477,6 +500,7 @@ public partial class App : Application
         _dur.Cancel();
         _ornekleme?.Wait(TimeSpan.FromSeconds(2));
         _csv?.Dispose();
+        _surecler?.Dispose();
         if (_fanDegisti)
         {
             try { _uygulayici?.FanOtomatigeDon(AcilDurum.Uyarla(_temel ?? HazirProfiller.Dengeli, _uygulananKademe).Guc); }
