@@ -8,35 +8,24 @@ namespace MonsterKontrol;
 
 public partial class MainWindow : FluentWindow, MonsterPerformans.IGezgin
 {
-    // Tek örnek: seçimler menü değişince kaybolmasın. Bölüm başlamadıysa sayfası da yok (motoru null).
+    // Tek örnek: seçimler menü değişince kaybolmasın
     readonly Dictionary<string, UIElement> _sayfalar = [];
 
     public MainWindow()
     {
         InitializeComponent();
-        if (App.KlavyeVar)
-        {
-            _sayfalar["isik"] = new K.IsikSayfasi();
-            _sayfalar["efektler"] = new K.EfektlerSayfasi();
-            _sayfalar["klavye-ayar"] = new K.AyarlarSayfasi();
-        }
-        if (App.PerformansVar)
-        {
-            _sayfalar["pano"] = new P.PanoSayfasi();
-            _sayfalar["uygulamalar"] = new P.UygulamalarSayfasi();
-            _sayfalar["fan"] = new P.FanSayfasi();
-            _sayfalar["profiller"] = new P.ProfillerSayfasi();
-            _sayfalar["ayarlar"] = new P.AyarlarSayfasi();
-        }
-        foreach (var liste in Listeler)
-            foreach (ListBoxItem o in liste.Items)
-                o.IsEnabled = _sayfalar.ContainsKey((string)o.Tag);
+        _sayfalar["isik"] = new K.IsikSayfasi();
+        _sayfalar["efektler"] = new K.EfektlerSayfasi();
+        _sayfalar["klavye-ayar"] = new K.AyarlarSayfasi();
+        _sayfalar["pano"] = new P.PanoSayfasi();
+        _sayfalar["uygulamalar"] = new P.UygulamalarSayfasi();
+        _sayfalar["fan"] = new P.FanSayfasi();
+        _sayfalar["profiller"] = new P.ProfillerSayfasi();
+        _sayfalar["ayarlar"] = new P.AyarlarSayfasi();
 
         var uyarilar = new List<string>();
-        if (!App.KlavyeVar) uyarilar.Add("Monster Klavye ayrı uygulama olarak açık: klavye bölümü kapalı.");
-        if (!App.PerformansVar) uyarilar.Add("Monster Performans ayrı uygulama olarak açık: performans bölümü kapalı.");
-        if (App.KlavyeVar && MonsterKlavye.App.DonanimHatasi is { } kh) uyarilar.Add("Klavye: " + kh);
-        if (App.PerformansVar && MonsterPerformans.App.DonanimHatasi is { } ph) uyarilar.Add("Performans: " + ph);
+        if (MonsterKlavye.App.DonanimHatasi is { } kh) uyarilar.Add("Klavye: " + kh);
+        if (MonsterPerformans.App.DonanimHatasi is { } ph) uyarilar.Add("Performans: " + ph);
         if (uyarilar.Count > 0)
         {
             HataCubugu.Title = "Bazı bölümler çalışmıyor";
@@ -44,7 +33,7 @@ public partial class MainWindow : FluentWindow, MonsterPerformans.IGezgin
             HataCubugu.IsOpen = true;
         }
 
-        Git(App.KlavyeVar ? "isik" : "pano");
+        Git("isik");
     }
 
     ListBox[] Listeler => [KlavyeMenu, PerformansMenu, AltMenu];
@@ -54,7 +43,7 @@ public partial class MainWindow : FluentWindow, MonsterPerformans.IGezgin
         if (profil is not null && _sayfalar.GetValueOrDefault("fan") is P.FanSayfasi fan) fan.ProfilSec(profil);
         foreach (var liste in Listeler)
             foreach (ListBoxItem o in liste.Items)
-                if (Equals(o.Tag, sayfa) && o.IsEnabled) o.IsSelected = true;
+                if (Equals(o.Tag, sayfa)) o.IsSelected = true;
     }
 
     void Menu_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -68,17 +57,11 @@ public partial class MainWindow : FluentWindow, MonsterPerformans.IGezgin
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
-        if (App.TepsiVar && !App.Cikiliyor)
+        if (!App.Cikiliyor)
         {
             e.Cancel = true; // efektler ve fan denetimi tepside sürer; çıkış tepsi menüsünden
             Hide();
         }
         base.OnClosing(e);
-    }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-        Application.Current.Shutdown(); // tepsi yoksa (iki bölüm de kapalı) kapatmak çıkıştır
     }
 }

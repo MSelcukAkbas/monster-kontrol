@@ -62,7 +62,7 @@
                               Checked="Guc_Click" Unchecked="Guc_Click" AutomationProperties.Name="Klavye ışığını aç veya kapat"
                               ToolTip="Aç / kapat" />
 
-                <Border x:Name="KlavyeKasasi" Width="580" VerticalAlignment="Bottom" Margin="0,0,0,20"
+                <Border Width="580" VerticalAlignment="Bottom" Margin="0,0,0,20"
                         Padding="10" CornerRadius="12" Background="#1D1D20" BorderBrush="#3A3A40" BorderThickness="1">
                     <Border.Effect>
                         <DropShadowEffect x:Name="KasaParilti" ShadowDepth="0" BlurRadius="60" Opacity="0.6" Color="#FF6A00" />

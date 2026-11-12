@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.Win32;
@@ -13,7 +12,7 @@ using MonsterPerformans.Cekirdek.Uzaktan;
 
 namespace MonsterPerformans;
 
-public partial class App : Application
+public static class App
 {
     public static string? DonanimHatasi { get; private set; }
     public static string? DllYolu { get; private set; }
@@ -50,10 +49,6 @@ public partial class App : Application
     /// <summary>Çıkış başladı: pencere kapanışı artık tepsiye gizlemez.</summary>
     public static bool Cikiliyor { get; private set; }
 
-    const string Ad = @"Local\MonsterPerformans";
-    static Mutex? _tekOrnek; // alan: yerel değişken olsa çöp toplayıcı bırakır, koruma sessizce kalkar
-    static EventWaitHandle? _gosterIstegi;
-
     static ProfilUygulayici? _uygulayici;
     static FanKontrol? _fan;
     static bool _fanDegisti; // fan bu oturumda otomatikten çıkarıldı: çıkışta güvenli duruma dön (bekçi yok)
@@ -82,37 +77,11 @@ public partial class App : Application
     static readonly CancellationTokenSource _dur = new();
     static Task? _ornekleme;
     static Dispatcher _arayuz = null!;
-    Tepsi? _tepsi;
 
-    protected override void OnStartup(StartupEventArgs e)
-    {
-        if (!Baslat(Dispatcher))
-        {
-            Shutdown();
-            return;
-        }
-        MainWindow = new MainWindow();
-        _tepsi = new Tepsi();
-        if (!e.Args.Contains(WindowsIleBaslat.TepsiArgumani)) MainWindow.Show();
-        base.OnStartup(e);
-    }
-
-    /// <summary>
-    /// Pencere ve tepsi dışında her şeyi başlatır (Monster Kontrol de bunu çağırır). Başka örnek açıksa ona "göster" der, false döner.
-    /// </summary>
-    public static bool Baslat(Dispatcher arayuz)
+    /// <summary>Pencere ve tepsi dışında her şeyi başlatır (Monster Kontrol çağırır).</summary>
+    public static void Baslat(Dispatcher arayuz)
     {
         _arayuz = arayuz;
-        _tekOrnek = new Mutex(true, Ad, out var ilk);
-        _gosterIstegi = new EventWaitHandle(false, EventResetMode.AutoReset, Ad + ".Goster");
-        if (!ilk)
-        {
-            AllowSetForegroundWindow(-1); // ASFW_ANY: ilk örnek penceresini öne alabilsin
-            _gosterIstegi.Set();
-            return false;
-        }
-        ThreadPool.RegisterWaitForSingleObject(_gosterIstegi, (_, _) => arayuz.BeginInvoke(PencereyiGoster), null, -1, false);
-
         try
         {
             _dchu = new DchuCihazi();
@@ -150,7 +119,6 @@ public partial class App : Application
         }, f => arayuz.Invoke(f));
 
         WindowsIleBaslat.YoluTazele();
-        return true;
     }
 
     /// <summary>1 Hz; DCHU ve PDH okumaları bloklar, arayüz iş parçacığında yapılmaz.</summary>
@@ -467,7 +435,7 @@ public partial class App : Application
 
     public static void PencereyiGoster()
     {
-        var p = Current.MainWindow;
+        var p = Application.Current.MainWindow;
         p.Show();
         if (p.WindowState == WindowState.Minimized) p.WindowState = WindowState.Normal;
         p.Activate();
@@ -476,20 +444,7 @@ public partial class App : Application
     public static void Cik()
     {
         Cikiliyor = true;
-        Current.Shutdown();
-    }
-
-    protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
-    {
-        Cikiliyor = true; // Windows kapanışını tepsiye gizleyerek engelleme
-        base.OnSessionEnding(e);
-    }
-
-    protected override void OnExit(ExitEventArgs e)
-    {
-        Durdur();
-        _tepsi?.Dispose();
-        base.OnExit(e);
+        Application.Current.Shutdown();
     }
 
     /// <summary>Güvenli kapanış: örnekleme durur, fan bu oturumda değiştiyse otomatiğe döner.</summary>
@@ -509,9 +464,5 @@ public partial class App : Application
         _nvml?.Dispose();
         _pdh?.Dispose();
         _dchu?.Dispose();
-        _tekOrnek?.Dispose();
     }
-
-    [DllImport("user32.dll")]
-    static extern bool AllowSetForegroundWindow(int processId);
 }

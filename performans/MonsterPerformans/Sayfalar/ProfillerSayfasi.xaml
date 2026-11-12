@@ -26,7 +26,7 @@
 
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
-                    <ui:Button x:Name="KopyalaDugmesi" Content="Kopyala" Icon="{ui:SymbolIcon Copy24}" Margin="0,0,8,0"
+                    <ui:Button Content="Kopyala" Icon="{ui:SymbolIcon Copy24}" Margin="0,0,8,0"
                                Click="Kopyala_Click" ToolTip="Seçili profilden yeni profil" />
                     <ui:Button x:Name="SilDugmesi" Content="Sil" Icon="{ui:SymbolIcon Delete24}" Click="Sil_Click" />
                 </StackPanel>

@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace MonsterPerformans.Cekirdek.Uzaktan;
 
 /// <summary>
-/// Dış programların (Monster Kontrol arayüzü, MCP sunucusu) performans durumunu okuduğu yerel kanal.
+/// Dış programların (MCP sunucusu) performans durumunu okuduğu yerel kanal.
 /// Yalnız bu Windows kullanıcısı bağlanabilir. Bağlantı başına tek satır JSON istek → tek satır JSON yanıt.
 /// Şimdilik salt okunur: fan / güç yazan komut yok.
 /// </summary>

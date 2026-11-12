@@ -34,17 +34,6 @@
                 </StackPanel>
             </DockPanel>
         </Border>
-        <Border Style="{StaticResource Satir}">
-            <DockPanel>
-                <ui:ToggleSwitch x:Name="Tepsi" DockPanel.Dock="Right" Checked="Tepsi_Click" Unchecked="Tepsi_Click"
-                                 AutomationProperties.Name="Kapatınca tepsiye küçült" />
-                <StackPanel>
-                    <TextBlock Text="Kapatınca tepsiye küçült" FontSize="14" />
-                    <TextBlock Text="Efektler pencere kapalıyken de çalışır. Kapalıysa pencereyi kapatmak uygulamadan çıkar."
-                               Style="{StaticResource Aciklama}" />
-                </StackPanel>
-            </DockPanel>
-        </Border>
 
         <TextBlock Text="Donanım" Style="{StaticResource Bolum}" />
         <Border Style="{StaticResource Satir}">

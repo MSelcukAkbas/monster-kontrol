@@ -21,13 +21,12 @@ public sealed class AyarlarTestleri : IDisposable
         using var m = new EfektMotoru(temel, _ => { }, () => 50, donguyuBaslat: false);
         m.EfektAyarla(ates, new EfektAyarlari(8, Efektler.Neon));
 
-        Ayarlar.Al(m, tepsiyeKucult: false).Yaz(Yol);
+        Ayarlar.Al(m).Yaz(Yol);
         var a = Ayarlar.Oku(Yol);
 
         Assert.Equal(temel, a.Durum);
         Assert.Same(ates, a.EtkinEfekt);
         Assert.Equal(new EfektAyarlari(8, Efektler.Neon), a.EfektAyarlari);
-        Assert.False(a.TepsiyeKucult);
         Assert.False(File.Exists(Yol + ".tmp"));
     }
 
@@ -50,6 +49,5 @@ public sealed class AyarlarTestleri : IDisposable
         Assert.Equal(new KlavyeDurumu(new Rgb(0xFF, 0x6A, 0x00), 100, true), a.Durum);
         Assert.Same(Efektler.Sabit, a.EtkinEfekt);
         Assert.Equal(new EfektAyarlari(1, Efektler.TamCark), a.EfektAyarlari);
-        Assert.True(a.TepsiyeKucult); // eksik alan varsayılanı alır
     }
 }

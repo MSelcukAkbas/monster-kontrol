@@ -1,5 +1,4 @@
 using System.IO;
-﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.Win32;
@@ -9,7 +8,7 @@ using MonsterKontrol.Dchu;
 
 namespace MonsterKlavye;
 
-public partial class App : Application
+public static class App
 {
     /// <summary>Klavye denetimi; DLL bulunamadıysa null (arayüz uyarı gösterir, yine açılır).</summary>
     public static KlavyeKontrol? Kontrol { get; private set; }
@@ -20,51 +19,18 @@ public partial class App : Application
     public static string? DonanimHatasi { get; private set; }
     public static string? DllYolu { get; private set; }
 
-    public static bool TepsiyeKucult { get; set { field = value; AyarDegisti(); } } = true;
-
     /// <summary>Çıkış başladı: pencere kapanışı artık tepsiye küçültmez.</summary>
     public static bool Cikiliyor { get; private set; }
-
-    const string Ad = @"Local\MonsterKlavye";
-    static Mutex? _tekOrnek; // alan olarak tutulur: yerel değişken olsa çöp toplayıcı bırakır, koruma sessizce kalkar
-    static EventWaitHandle? _gosterIstegi;
 
     static DchuCihazi? _dchu;
     static KomutKanali? _kanal;
     static Dispatcher _arayuz = null!;
-    Tepsi? _tepsi;
     static readonly DispatcherTimer _kayitZamanlayici = new() { Interval = TimeSpan.FromMilliseconds(500) };
 
-    protected override void OnStartup(StartupEventArgs e)
-    {
-        if (!Baslat(Dispatcher))
-        {
-            Shutdown();
-            return;
-        }
-        MainWindow = new MainWindow();
-        _tepsi = new Tepsi();
-        if (!e.Args.Contains(WindowsIleBaslat.TepsiArgumani)) MainWindow.Show();
-        base.OnStartup(e);
-    }
-
-    /// <summary>
-    /// Pencere ve tepsi dışında her şeyi başlatır (Monster Kontrol de bunu çağırır). Başka örnek açıksa ona "göster" der, false döner.
-    /// </summary>
-    public static bool Baslat(Dispatcher arayuz)
+    /// <summary>Pencere ve tepsi dışında her şeyi başlatır (Monster Kontrol çağırır).</summary>
+    public static void Baslat(Dispatcher arayuz)
     {
         _arayuz = arayuz;
-        // Tek örnek: DLL'e ve klavyeye dokunmadan ÖNCE. İkinci açılış ilkine "göster" der ve çıkar.
-        _tekOrnek = new Mutex(true, Ad, out var ilk);
-        _gosterIstegi = new EventWaitHandle(false, EventResetMode.AutoReset, Ad + ".Goster");
-        if (!ilk)
-        {
-            AllowSetForegroundWindow(-1); // ASFW_ANY: ilk örnek penceresini öne alabilsin
-            _gosterIstegi.Set();
-            return false;
-        }
-        ThreadPool.RegisterWaitForSingleObject(_gosterIstegi, (_, _) => arayuz.BeginInvoke(PencereyiGoster), null, -1, false);
-
         try
         {
             _dchu = new DchuCihazi();
@@ -77,7 +43,6 @@ public partial class App : Application
         }
 
         var ayar = Ayarlar.Oku(Ayarlar.VarsayilanYol);
-        TepsiyeKucult = ayar.TepsiyeKucult;
         Motor = new EfektMotoru(ayar.Durum,
             d => Kontrol?.Ayarla(d),
             () => (_dchu ?? throw new DllNotFoundException()).TamponOku(Komutlar.DurumTamponu)[18]); // bayt 18 = CPU °C (docs/01)
@@ -90,7 +55,6 @@ public partial class App : Application
         SystemEvents.PowerModeChanged += GucDegisti;
         SystemEvents.SessionSwitch += OturumDegisti;
         _kanal = new KomutKanali(arayuz);
-        return true;
     }
 
     /// <summary>Oturum açılışında / uyanınca BIOS veya CC kendi kaydını (mavi) geç yazabiliyor: birkaç saniye sonra bir kez daha yaz.</summary>
@@ -121,7 +85,7 @@ public partial class App : Application
 
     public static void PencereyiGoster()
     {
-        var p = Current.MainWindow;
+        var p = Application.Current.MainWindow;
         p.Show();
         if (p.WindowState == WindowState.Minimized) p.WindowState = WindowState.Normal;
         p.Activate();
@@ -130,7 +94,7 @@ public partial class App : Application
     public static void Cik()
     {
         Cikiliyor = true;
-        Current.Shutdown();
+        Application.Current.Shutdown();
     }
 
     /// <summary>Kaydırıcı sürüklenirken her değişimde yazmamak için 500 ms birleştirilir.</summary>
@@ -143,22 +107,8 @@ public partial class App : Application
     static void Kaydet()
     {
         _kayitZamanlayici.Stop();
-        try { Ayarlar.Al(Motor, TepsiyeKucult).Yaz(Ayarlar.VarsayilanYol); }
+        try { Ayarlar.Al(Motor).Yaz(Ayarlar.VarsayilanYol); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // bir sonraki değişiklikte yeniden denenir
-    }
-
-    protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
-    {
-        Cikiliyor = true; // Windows kapanışını tepsiye küçülterek engelleme
-        Kaydet();
-        base.OnSessionEnding(e);
-    }
-
-    protected override void OnExit(ExitEventArgs e)
-    {
-        Durdur();
-        _tepsi?.Dispose();
-        base.OnExit(e);
     }
 
     /// <summary>Güvenli kapanış: kanal, kayıt, son sabit renk, DLL.</summary>
@@ -177,9 +127,5 @@ public partial class App : Application
         }
         Kontrol?.Dispose();
         _dchu?.Dispose();
-        _tekOrnek?.Dispose();
     }
-
-    [DllImport("user32.dll")]
-    static extern bool AllowSetForegroundWindow(int processId);
 }

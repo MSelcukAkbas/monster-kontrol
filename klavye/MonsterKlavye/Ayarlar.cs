@@ -13,8 +13,7 @@ public sealed record Ayarlar(
     bool Acik = true,
     string Efekt = "sabit",
     int Hiz = 5,
-    string? Skala = null,
-    bool TepsiyeKucult = true)
+    string? Skala = null)
 {
     public static string VarsayilanYol { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MonsterKlavye", "ayarlar.json");
@@ -37,10 +36,10 @@ public sealed record Ayarlar(
         File.Move(gecici, yol, overwrite: true);
     }
 
-    public static Ayarlar Al(EfektMotoru m, bool tepsiyeKucult)
+    public static Ayarlar Al(EfektMotoru m)
     {
         var (t, a) = (m.Temel, m.Ayarlar);
-        return new(t.Renk.Hex, t.ParlaklikYuzde, t.Acik, m.Efekt.Id, a.Hiz, a.Skala.Ad, tepsiyeKucult);
+        return new(t.Renk.Hex, t.ParlaklikYuzde, t.Acik, m.Efekt.Id, a.Hiz, a.Skala.Ad);
     }
 
     // Dosya kullanıcı elinden geçebilir: değerler sınırlanır, bilinmeyen efekt/skala varsayılana düşer.

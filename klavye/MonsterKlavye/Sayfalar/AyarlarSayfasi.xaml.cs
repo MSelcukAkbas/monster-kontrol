@@ -10,7 +10,6 @@ public partial class AyarlarSayfasi : UserControl
     {
         InitializeComponent();
         Baslat.IsChecked = WindowsIleBaslat.Acik;
-        Tepsi.IsChecked = App.TepsiyeKucult;
         if (App.DonanimHatasi is { } hata)
         {
             DurumNoktasi.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x45, 0x45));
@@ -29,8 +28,6 @@ public partial class AyarlarSayfasi : UserControl
         WindowsIleBaslat.Acik = Baslat.IsChecked == true;
         Baslat.IsChecked = WindowsIleBaslat.Acik; // kayıt defterinde gerçekte ne olduğunu göster
     }
-
-    void Tepsi_Click(object sender, RoutedEventArgs e) => App.TepsiyeKucult = Tepsi.IsChecked == true;
 
     void YenidenUygula_Click(object sender, RoutedEventArgs e) => App.Kontrol?.YenidenUygula();
 }
